@@ -5,12 +5,14 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, CheckCircle2, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import QRCodeDisplay from '@/components/QRCodeDisplay';
 import { supabase } from '@/lib/supabase';
 
 export default function RegisterPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [generatedToken, setGeneratedToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
@@ -72,6 +74,7 @@ export default function RegisterPage() {
 
       if (tokenError) throw tokenError;
 
+      setGeneratedToken(token);
       setSuccess(true);
       // In un'applicazione reale, qui scatterebbe l'invio email tramite Edge Function o servizio esterno
     } catch (err: any) {
@@ -84,17 +87,33 @@ export default function RegisterPage() {
 
   if (success) {
     return (
-      <main className="flex flex-col items-center justify-center min-h-screen p-6 text-center animate-in fade-in duration-500">
-        <div className="w-24 h-24 bg-green-500/20 rounded-full flex items-center justify-center mb-8">
-          <CheckCircle2 className="w-16 h-16 text-green-500" />
+      <main className="flex flex-col items-center justify-center min-h-screen p-6 text-center animate-in fade-in zoom-in duration-500">
+        <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mb-6">
+          <CheckCircle2 className="w-12 h-12 text-green-500" />
         </div>
-        <h1 className="text-3xl font-bold mb-4">Registrazione Completata!</h1>
-        <p className="text-slate-400 text-lg mb-8 max-w-md">
-          La tua richiesta di pre-adesione è stata presa in carico. Riceverai a breve un'email con il tuo QRCode per l'accesso.
+        <h1 className="text-3xl font-bold mb-2">Registrazione Completata!</h1>
+        <p className="text-slate-400 mb-8 max-w-md">
+          Ecco il tuo QRCode di accesso. Riceverai una copia anche via email.
         </p>
-        <Link href="/" className="btn-primary">
-          Torna alla Home
-        </Link>
+        
+        {generatedToken && (
+          <div className="mb-8">
+            <QRCodeDisplay token={generatedToken} />
+            <p className="text-xs text-slate-500 mt-4 uppercase">Mostra questo codice al check-in</p>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 gap-3 w-full max-w-xs">
+          <button 
+            onClick={() => window.print()}
+            className="btn-primary bg-slate-800 hover:bg-slate-700"
+          >
+            Stampa o Salva PDF
+          </button>
+          <Link href="/" className="btn-primary">
+            Torna alla Home
+          </Link>
+        </div>
       </main>
     );
   }
