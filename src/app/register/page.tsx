@@ -1,15 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { CheckCircle2, Loader2, ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
+import { CheckCircle2, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import QRCodeDisplay from '@/components/QRCodeDisplay';
 import { supabase } from '@/lib/supabase';
 
 export default function RegisterPage() {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [generatedToken, setGeneratedToken] = useState<string | null>(null);
@@ -68,8 +65,7 @@ export default function RegisterPage() {
       setGeneratedToken(token);
       setSuccess(true);
     } catch (err: any) {
-      console.error(err);
-      setError(err.message || 'Errore durante la registrazione. Riprova.');
+      setError(err.message || 'Errore di comunicazione. Riprova.');
     } finally {
       setLoading(false);
     }
@@ -77,149 +73,119 @@ export default function RegisterPage() {
 
   if (success) {
     return (
-      <main className="min-h-screen bg-white text-slate-900 p-6 flex flex-col items-center justify-center text-center">
-        <CheckCircle2 className="w-20 h-20 text-green-500 mb-6" />
-        <h1 className="text-4xl font-bold mb-4">Registrazione Completata!</h1>
-        <p className="text-2xl mb-10 text-slate-600">Ecco il tuo QRCode per l'accesso.</p>
-        
-        {generatedToken && <QRCodeDisplay token={generatedToken} />}
-        
-        <div className="mt-12 space-y-4 w-full max-w-md">
-          <button onClick={() => window.print()} className="w-full bg-slate-100 py-6 rounded-xl font-bold text-2xl border-2 border-slate-200">
-            Salva QRCode
-          </button>
-          <Link href="/" className="block w-full bg-lni-blue text-white py-6 rounded-xl font-bold text-2xl text-center">
-            Torna alla Home
-          </Link>
+      <div className="container-legacy">
+        <div className="header-logo-legacy">
+          <Image src="/logo.png" alt="Logo" width={100} height={100} />
+          <h2>Registrazione Completata!</h2>
         </div>
-      </main>
+        <p>Ecco il tuo QRCode ufficiale. Mostralo al check-in.</p>
+        <div style={{ display: 'flex', justifyContent: 'center', margin: '40px 0' }}>
+          {generatedToken && <QRCodeDisplay token={generatedToken} />}
+        </div>
+        <button onClick={() => window.print()} className="button-legacy">Salva QRCode</button>
+        <button onClick={() => window.location.href = '/'} className="button-legacy" style={{ backgroundColor: '#666' }}>Torna alla Home</button>
+      </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-white text-slate-900">
-      <div className="max-w-2xl mx-auto p-5">
-        {/* HEADER IDENTICO AL VECCHIO SISTEMA */}
-        <header className="flex items-center border-b border-slate-200 pb-4 mb-6">
-          <div className="w-[100px] mr-4">
-            <Image src="/logo.png" alt="Logo LNI" width={100} height={100} className="object-contain" />
-          </div>
-          <h2 className="text-[30px] font-bold text-lni-blue leading-tight">
-            Richiesta di Pre-Iscrizione
-          </h2>
-        </header>
-
-        <p className="text-[22px] mb-8 text-slate-700">
-          Compila il modulo per avviare la tua pre-iscrizione non vincolante alla LNI Messina.
-        </p>
-
-        {error && (
-          <div className="bg-red-50 border-2 border-red-200 text-red-600 p-5 rounded-xl mb-8 text-xl font-bold text-center">
-            ❌ {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <div className="space-y-2">
-            <label className="block text-[24px] font-bold">Nome *</label>
-            <input
-              required
-              name="firstName"
-              value={formData.firstName}
-              onChange={handleChange}
-              className="w-full border-2 border-slate-300 rounded-lg p-5 text-[26px] outline-none focus:border-lni-blue"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-[24px] font-bold">Cognome *</label>
-            <input
-              required
-              name="lastName"
-              value={formData.lastName}
-              onChange={handleChange}
-              className="w-full border-2 border-slate-300 rounded-lg p-5 text-[26px] outline-none focus:border-lni-blue"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-[24px] font-bold">Email *</label>
-            <input
-              required
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full border-2 border-slate-300 rounded-lg p-5 text-[26px] outline-none focus:border-lni-blue"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-[24px] font-bold">Telefono *</label>
-            <input
-              required
-              type="tel"
-              name="phone"
-              pattern="[0-9]{9,15}"
-              value={formData.phone}
-              onChange={handleChange}
-              placeholder="Minimo 9 cifre"
-              className="w-full border-2 border-slate-300 rounded-lg p-5 text-[26px] outline-none focus:border-lni-blue"
-            />
-          </div>
-
-          <hr className="border-slate-200" />
-
-          <section>
-            <h3 className="text-[26px] font-bold mb-6">Consensi di Compliance</h3>
-            
-            <div className="space-y-6 bg-slate-50 p-5 rounded-xl border border-slate-100">
-              <div className="flex items-start gap-4">
-                <input
-                  required
-                  type="checkbox"
-                  id="gdprConsent"
-                  name="gdprConsent"
-                  checked={formData.gdprConsent}
-                  onChange={handleChange}
-                  className="mt-2 w-8 h-8 rounded border-slate-300 text-lni-blue focus:ring-lni-blue accent-lni-blue"
-                  style={{ transform: 'scale(1.5)' }}
-                />
-                <label htmlFor="gdprConsent" className="text-[20px] text-slate-700 leading-tight">
-                  Dichiaro di aver letto l'Informativa sul Trattamento dei Dati Personali e acconsento al trattamento dei dati. (Obbligatorio)
-                </label>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <input
-                  type="checkbox"
-                  id="marketingConsent"
-                  name="marketingConsent"
-                  checked={formData.marketingConsent}
-                  onChange={handleChange}
-                  className="mt-2 w-8 h-8 rounded border-slate-300 text-lni-blue focus:ring-lni-blue accent-lni-blue"
-                  style={{ transform: 'scale(1.5)' }}
-                />
-                <label htmlFor="marketingConsent" className="text-[20px] text-slate-700 leading-tight">
-                  Acconsento all'invio di comunicazioni e newsletter (Facoltativo)
-                </label>
-              </div>
-            </div>
-          </section>
-
-          <button
-            disabled={loading}
-            type="submit"
-            className="w-full bg-lni-blue text-white py-8 rounded-xl font-bold text-[30px] shadow-lg active:scale-95 transition-all flex items-center justify-center gap-4 disabled:opacity-50"
-          >
-            {loading ? <Loader2 className="w-10 h-10 animate-spin" /> : 'Registra e Invia Codice'}
-          </button>
-        </form>
-
-        <footer className="py-10 text-center text-slate-400 text-xl">
-          &copy; Lega Navale Italiana - Sezione di Messina
-        </footer>
+    <div className="container-legacy">
+      <div className="header-logo-legacy">
+        <Image src="/logo.png" alt="Logo LNI Messina" width={80} height={80} />
+        <h2>Richiesta di Pre-Iscrizione</h2>
       </div>
-    </main>
+      <p>Compila il modulo per avviare la tua pre-iscrizione non vincolante alla LNI Messina.</p>
+
+      <form onSubmit={handleSubmit}>
+        <label className="label-legacy">Nome *</label>
+        <input
+          required
+          name="firstName"
+          value={formData.firstName}
+          onChange={handleChange}
+          className="input-legacy"
+        />
+
+        <label className="label-legacy">Cognome *</label>
+        <input
+          required
+          name="lastName"
+          value={formData.lastName}
+          onChange={handleChange}
+          className="input-legacy"
+        />
+
+        <label className="label-legacy">Email *</label>
+        <input
+          required
+          type="email"
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
+          className="input-legacy"
+        />
+
+        <label className="label-legacy">Telefono *</label>
+        <input
+          required
+          type="tel"
+          name="phone"
+          pattern="[0-9]{9,15}"
+          value={formData.phone}
+          onChange={handleChange}
+          className="input-legacy"
+          title="Inserisci solo numeri, minimo 9 cifre"
+        />
+
+        <hr style={{ margin: '30px 0', border: '0', borderTop: '1px solid #eee' }} />
+        
+        <h3 style={{ fontSize: '26px', marginTop: '30px' }}>Consensi di Compliance</h3>
+
+        <div className="checkbox-group-legacy">
+          <input
+            required
+            type="checkbox"
+            id="gdprConsent"
+            name="gdprConsent"
+            checked={formData.gdprConsent}
+            onChange={handleChange}
+            style={{ transform: 'scale(1.8)', marginRight: '15px' }}
+          />
+          <label htmlFor="gdprConsent" style={{ fontSize: '20px' }}>
+            Dichiaro di aver letto l'Informativa sul Trattamento dei Dati Personali e acconsento al trattamento dei dati. (Obbligatorio)
+          </label>
+          <br /><br />
+
+          <input
+            type="checkbox"
+            id="marketingConsent"
+            name="marketingConsent"
+            checked={formData.marketingConsent}
+            onChange={handleChange}
+            style={{ transform: 'scale(1.8)', marginRight: '15px' }}
+          />
+          <label htmlFor="marketingConsent" style={{ fontSize: '20px' }}>
+            Acconsento all'invio di comunicazioni e newsletter (Facoltativo)
+          </label>
+        </div>
+
+        {error && <div style={{ color: 'red', fontSize: '24px', textAlign: 'center', margin: '20px 0' }}>❌ {error}</div>}
+
+        <button type="submit" disabled={loading} className="button-legacy">
+          {loading ? 'Invio in corso...' : 'Registra e Invia Codice'}
+        </button>
+      </form>
+
+      <style jsx>{`
+        .container-legacy { width: 100%; min-height: 100vh; padding: 20px; box-sizing: border-box; background: white; }
+        .header-logo-legacy { display: flex; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+        .header-logo-legacy h2 { margin: 0; font-size: 30px; font-weight: bold; color: #007bff; margin-left: 15px; }
+        .label-legacy { display: block; margin-top: 25px; margin-bottom: 10px; font-weight: bold; font-size: 24px; }
+        .input-legacy { width: 100%; padding: 20px; border: 2px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 26px; }
+        .checkbox-group-legacy { margin: 30px 0; padding: 15px; border: 1px solid #f0f0f0; border-radius: 8px; }
+        .button-legacy { background-color: #007bff; color: white; padding: 25px; margin: 40px 0 15px 0; border: none; border-radius: 8px; cursor: pointer; width: 100%; font-size: 30px; font-weight: bold; }
+        p { font-size: 22px; color: #333; }
+      `}</style>
+    </div>
   );
 }

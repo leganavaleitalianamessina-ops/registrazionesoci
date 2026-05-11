@@ -1,182 +1,86 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Html5QrcodeScanner, Html5QrcodeSupportedFormats } from 'html5-qrcode';
+import { Html5QrcodeScanner } from 'html5-qrcode';
 import { supabase } from '@/lib/supabase';
-import { ShieldCheck, ShieldAlert, Camera, RefreshCw } from 'lucide-react';
-
-interface ScanResult {
-  success: boolean;
-  message: string;
-  userName?: string;
-  type?: string;
-}
+import Image from 'next/image';
 
 export default function CheckinPage() {
-  const [scanResult, setScanResult] = useState<ScanResult | null>(null);
+  const [scanResult, setScanResult] = useState<any>(null);
   const [isScanning, setIsScanning] = useState(true);
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const scanner = new Html5QrcodeScanner(
       "reader",
-      { 
-        fps: 10, 
-        qrbox: { width: 250, height: 250 },
-        aspectRatio: 1.0,
-        supportedScanTypes: [0] // Camera only
-      },
-      /* verbose= */ false
+      { fps: 10, qrbox: { width: 280, height: 280 }, aspectRatio: 1.0 },
+      false
     );
 
-    scanner.render(onScanSuccess, onScanError);
+    scanner.render(async (decodedText) => {
+      if (!isScanning) return;
+      setIsScanning(false);
 
-    function onScanError(err: any) {
-      // Ignoriamo gli errori di "non trovato" durante la scansione continua
-    }
+      try {
+        const parts = decodedText.split('/');
+        const token = parts[parts.length - 1];
 
-    return () => {
-      scanner.clear().catch(error => console.error("Failed to clear scanner", error));
-    };
-  }, []);
+        const { data, error } = await supabase
+          .from('qr_tokens')
+          .select('*, users(*)')
+          .eq('token', token)
+          .single();
 
-  async function onScanSuccess(decodedText: string) {
-    if (!isScanning || loading) return;
-    
-    setIsScanning(false);
-    setLoading(true);
-
-    try {
-      // 1. Estrarre il token dall'URL (formato: https://domain/validate/TOKEN)
-      const parts = decodedText.split('/');
-      const token = parts[parts.length - 1];
-
-      if (!token) throw new Error("QR Code non valido");
-
-      // 2. Verificare il token nel DB
-      const { data: tokenData, error: tokenError } = await supabase
-        .from('qr_tokens')
-        .select('*, users(*)')
-        .eq('token', token)
-        .eq('is_active', true)
-        .single();
-
-      if (tokenError || !tokenData) {
-        setScanResult({ success: false, message: "Codice non trovato o revocato" });
-      } else {
-        const user = tokenData.users;
-        const isExpired = user.expiration_date && new Date(user.expiration_date) < new Date();
-
-        if (isExpired) {
-          setScanResult({ 
-            success: false, 
-            message: "Accesso Scaduto", 
-            userName: `${user.first_name} ${user.last_name}` 
-          });
+        if (error || !data) {
+          setScanResult({ success: false, message: "NON VALIDO" });
         } else {
-          setScanResult({ 
-            success: true, 
-            message: "Accesso Autorizzato", 
-            userName: `${user.first_name} ${user.last_name}`,
-            type: user.user_type
-          });
-
-          // 3. Registrare il log (Check-in)
-          await supabase.from('checkin_logs').insert([
-            { 
-              user_id: user.id, 
-              checkin_result: 'SUCCESS',
-              device_info: navigator.userAgent
-            }
-          ]);
-          
-          // Feedback aptico (vibrazione) se supportato
+          const user = data.users;
+          setScanResult({ success: true, message: "VALIDO", name: `${user.first_name} ${user.last_name}` });
+          await supabase.from('checkin_logs').insert([{ user_id: user.id, checkin_result: 'SUCCESS' }]);
           if (navigator.vibrate) navigator.vibrate(200);
         }
+      } catch (e) {
+        setScanResult({ success: false, message: "ERRORE" });
       }
-    } catch (err: any) {
-      setScanResult({ success: false, message: "Errore durante la scansione" });
-    } finally {
-      setLoading(false);
-    }
-  }
+    }, () => {});
 
-  const resetScanner = () => {
-    setScanResult(null);
-    setIsScanning(true);
-  };
+    return () => { scanner.clear().catch(() => {}); };
+  }, [isScanning]);
 
   return (
-    <main className="min-h-screen bg-black text-white flex flex-col p-4">
-      <header className="flex items-center justify-between py-4 border-bottom border-slate-800 mb-4">
-        <h1 className="text-xl font-bold flex items-center gap-2">
-          <Camera className="text-lni-accent" />
-          LNI Check-in
-        </h1>
-        <div className={`w-3 h-3 rounded-full ${isScanning ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></div>
-      </header>
-
-      <div className="flex-1 flex flex-col items-center justify-center relative">
-        {isScanning && (
-          <div className="w-full max-w-md overflow-hidden rounded-3xl border-2 border-slate-800 bg-slate-900 shadow-2xl">
-            <div id="reader"></div>
-          </div>
-        )}
-
-        {scanResult && (
-          <div className={`w-full max-w-md p-8 rounded-3xl text-center animate-in zoom-in duration-300 ${
-            scanResult.success ? 'bg-green-600' : 'bg-red-600'
-          }`}>
-            {scanResult.success ? (
-              <ShieldCheck className="w-24 h-24 mx-auto mb-6" />
-            ) : (
-              <ShieldAlert className="w-24 h-24 mx-auto mb-6" />
-            )}
-            
-            <h2 className="text-3xl font-black mb-2 uppercase tracking-tight">
-              {scanResult.message}
-            </h2>
-            
-            {scanResult.userName && (
-              <div className="bg-black/20 p-4 rounded-xl mb-8">
-                <p className="text-xl font-bold">{scanResult.userName}</p>
-                {scanResult.type && (
-                  <p className="text-sm opacity-80 uppercase font-medium mt-1">
-                    {scanResult.type === 'active_member' ? 'Socio Attivo' : 'Pre-Aderente'}
-                  </p>
-                )}
-              </div>
-            )}
-
-            <button 
-              onClick={resetScanner}
-              className="w-full py-5 bg-white text-black rounded-2xl font-black text-xl flex items-center justify-center gap-3 active:scale-95 transition-transform"
-            >
-              <RefreshCw className="w-6 h-6" />
-              NUOVA SCANSIONE
-            </button>
-          </div>
-        )}
+    <div className="container-legacy">
+      <div className="header-logo-legacy">
+        <Image src="/logo.png" alt="Logo" width={60} height={60} />
+        <h2>Scanner Check-in</h2>
       </div>
 
-      <footer className="py-6 text-center text-slate-500 text-sm">
-        Sistema di Controllo Accessi LNI Messina
-      </footer>
+      {isScanning ? (
+        <div id="reader" style={{ width: '100%', borderRadius: '20px', overflow: 'hidden', border: '4px solid #007bff' }}></div>
+      ) : (
+        <div style={{ 
+          padding: '40px 20px', 
+          borderRadius: '20px', 
+          backgroundColor: scanResult?.success ? '#28a745' : '#dc3545', 
+          color: 'white', 
+          textAlign: 'center' 
+        }}>
+          <h1 style={{ fontSize: '60px', fontWeight: '900', margin: '0' }}>{scanResult?.message}</h1>
+          {scanResult?.name && <p style={{ fontSize: '30px', fontWeight: 'bold', marginTop: '20px' }}>{scanResult.name}</p>}
+          <button 
+            onClick={() => { setScanResult(null); setIsScanning(true); }}
+            className="button-legacy" 
+            style={{ backgroundColor: 'white', color: 'black', marginTop: '40px' }}
+          >
+            NUOVA SCANSIONE
+          </button>
+        </div>
+      )}
 
-      <style jsx global>{`
-        #reader { border: none !important; }
-        #reader img { display: none; }
-        #reader__status_span { display: none; }
-        #reader__scan_region { background: black; }
-        #reader__dashboard_section_csr button {
-          background: #003366 !important;
-          color: white !important;
-          padding: 10px 20px !important;
-          border-radius: 8px !important;
-          border: none !important;
-          margin-top: 10px !important;
-        }
+      <style jsx>{`
+        .container-legacy { width: 100%; min-height: 100vh; padding: 20px; box-sizing: border-box; background: white; font-family: Arial, sans-serif; }
+        .header-logo-legacy { display: flex; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
+        .header-logo-legacy h2 { margin: 0; font-size: 28px; font-weight: bold; color: #007bff; margin-left: 10px; }
+        .button-legacy { background-color: #007bff; color: white; padding: 25px; border: none; border-radius: 12px; cursor: pointer; width: 100%; font-size: 26px; font-weight: bold; }
       `}</style>
-    </main>
+    </div>
   );
 }
