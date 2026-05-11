@@ -3,22 +3,26 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 255, 255, 255;
-  --background-start-rgb: 2, 6, 23;
-  --background-end-rgb: 2, 6, 23;
+  --lni-blue: #003366;
+  --lni-light: #0055aa;
+  --lni-accent: #ffcc00;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: rgb(var(--background-start-rgb));
+  @apply bg-white text-slate-900 antialiased;
 }
 
 @layer components {
   .btn-primary {
-    @apply px-6 py-3 bg-lni-blue text-white rounded-xl font-bold hover:bg-lni-light transition-all active:scale-95 shadow-lg shadow-lni-blue/20;
+    @apply px-6 py-3 bg-[var(--lni-blue)] text-white rounded-xl font-bold hover:bg-[var(--lni-light)] transition-all active:scale-95 shadow-lg;
   }
   
   .card {
-    @apply p-6 bg-slate-900/50 border border-slate-800 rounded-2xl backdrop-blur-sm;
+    @apply p-6 bg-white border border-slate-200 rounded-2xl shadow-sm;
   }
+}
+
+/* Fix per lo scanner QR */
+#reader__dashboard_section_csr button {
+  @apply bg-[var(--lni-blue)] text-white px-4 py-2 rounded-lg font-bold !important;
 }
