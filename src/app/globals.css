@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 2, 6, 23;
+  --background-end-rgb: 2, 6, 23;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: rgb(var(--background-start-rgb));
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-6 py-3 bg-lni-blue text-white rounded-xl font-bold hover:bg-lni-light transition-all active:scale-95 shadow-lg shadow-lni-blue/20;
+  }
+  
+  .card {
+    @apply p-6 bg-slate-900/50 border border-slate-800 rounded-2xl backdrop-blur-sm;
+  }
+}

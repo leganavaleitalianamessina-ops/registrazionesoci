@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <title>Iscrizione LNI Messina</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+        /* CSS Ottimizzato per Full-Screen Mobile con Font Fissi Grandi */
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background-color: #ffffff; 
+            color: #333;
+        }
+        .container { 
+            width: 100%;
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 20px; 
+            box-shadow: none; 
+            box-sizing: border-box; 
+        }
+
+        /* HEADER E LOGO */
+        .header-logo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .header-logo img {
+            width: 200px; 
+            height: auto;
+            margin-right: 15px;
+        }
+        .header-logo h2 {
+            margin: 0;
+            font-size: 30px; 
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        /* CAMPI FORM - MASSIMA INTERAZIONE TOUCH */
+        label {
+            display: block;
+            margin-top: 25px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            font-size: 24px; 
+        }
+        input[type="text"], input[type="email"], input[type="tel"] {
+            width: 100%; 
+            padding: 20px; 
+            border: 2px solid #ccc; 
+            border-radius: 8px; 
+            box-sizing: border-box; 
+            font-size: 26px; 
+        }
+
+        /* Testo di descrizione generale e Titoli di sezione */
+        p {
+            font-size: 22px;
+        }
+        h3 {
+            font-size: 26px;
+            margin-top: 30px;
+        }
+
+        /* Stili per le checkbox */
+        .checkbox-group {
+            margin: 30px 0;
+            padding: 15px;
+            border: 1px solid #f0f0f0;
+            border-radius: 8px;
+        }
+        .checkbox-group label {
+            display: inline;
+            font-weight: normal;
+            margin: 0;
+            font-size: 20px; 
+        }
+        input[type="checkbox"] {
+            transform: scale(1.8); 
+            margin-right: 15px;
+        }
+
+        /* PULSANTE */
+        button { 
+            background-color: #007bff; 
+            color: white; 
+            padding: 25px; 
+            margin: 40px 0 15px 0; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            width: 100%; 
+            font-size: 30px; 
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        button:hover:not(:disabled) { 
+            background-color: #0056b3; 
+        }
+        button:disabled {
+            background-color: #99c2ff;
+            cursor: not-allowed;
+        }
+
+        /* MESSAGGI DI RISPOSTA */
+        #responseMessage {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 4px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 24px;
+        }
+        /* Stile specifico per il link nella checkbox */
+        .checkbox-group a {
+            color: #007bff;
+            text-decoration: underline;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-logo">
+            <img src="https://www.leganavale.it/mod/aalborg_theme/pages/generic.php?filename=0970576001764957180_Progetto%20senza%20titolo.png" alt="Logo LNI Messina">
+            <h2>Richiesta di Pre-Iscrizione</h2>
+        </div>
+        <p>Compila il modulo per avviare la tua pre-iscrizione non vincolante alla LNI Messina.</p>
+
+        <form id="iscrizioneForm">
+            
+            <label for="nome">Nome *</label>
+            <input type="text" id="nome" name="nome" required>
+
+            <label for="cognome">Cognome *</label>
+            <input type="text" id="cognome" name="cognome" required>
+
+            <label for="email">Email *</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="telefono">Telefono *</label>
+            <input type="tel" id="telefono" name="telefono" required pattern="[0-9]{9,15}" title="Inserisci solo numeri, minimo 9 cifre (usato per Check-in)">
+
+            <hr>
+            
+            <h3>Consensi di Compliance</h3>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="consenso_legale" name="consenso_legale" value="Sì, acconsento" required>
+                <label for="consenso_legale">
+                    Dichiaro di aver letto l'<a href="https://www.leganavale.it/mod/aalborg_theme/pages/generic.php?filename=0240685001765304986_InformativaTrattamentoDatiPersonaliRegistrazioneTelematica.pdf" target="_blank">Informativa sul Trattamento dei Dati Personali</a> e acconsento al trattamento dei dati ai fini della registrazione della domanda e accesso temporaneo ai servizi. (Obbligatorio)
+                </label>
+                <br><br>
+
+                <input type="checkbox" id="consenso_comunicazioni" name="consenso_comunicazioni" value="Sì, desidero ricevere comunicazioni">
+                <label for="consenso_comunicazioni">Acconsento all'invio di comunicazioni e newsletter (Facoltativo)</label>
+            </div>
+            
+            <button type="submit" id="submitButton">Registra e Invia Codice</button>
+
+            <div id="responseMessage"></div>
+        </form>
+    </div>
+
+    <script>
+        const form = document.getElementById('iscrizioneForm');
+        const submitButton = document.getElementById('submitButton');
+        const responseDiv = document.getElementById('responseMessage');
+
+        // GESTORE DI SUCCESSO: Esegue il reindirizzamento alla pagina di conferma
+        function handleSuccess(redirectUrl) {
+            // Questa linea risolve il blocco. Forziamo il reindirizzamento all'URL fornito dal server.
+            window.top.location.href = redirectUrl; 
+        }
+
+        // GESTORE DI ERRORE: Riazzera il bottone e mostra il messaggio
+        function handleError(error) {
+            submitButton.disabled = false;
+            // Assicuriamoci che il messaggio sia evidente
+            responseDiv.innerHTML = '<p style="color: red; font-size: 24px;">❌ Errore di comunicazione: ' + error.message + ' (Riprova)</p>';
+        }
+        
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); 
+            
+            // 1. Disabilita il pulsante e mostra lo stato
+            submitButton.disabled = true;
+            responseDiv.innerHTML = '<p style="color: #007bff; font-size: 24px;">Invio e registrazione in corso...</p>';
+
+            const formData = new FormData(form);
+            const data = {};
+            // Trasforma i dati del form in oggetto JSON
+            for (const [key, value] of formData.entries()) {
+                data[key] = value;
+            }
+
+            // 2. Chiama la funzione lato server
+            google.script.run
+                .withSuccessHandler(handleSuccess) 
+                .withFailureHandler(handleError)   
+                .inviaDatiIscrizione(data);
+        });
+    </script>
+</body>
+</html>

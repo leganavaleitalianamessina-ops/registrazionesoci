@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Modulo di Pre-Iscrizione LNI Messina</title>
+    
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background-color: #f4f4f4; /* Leggero sfondo */
+            color: #333;
+        }
+        .container { 
+            width: 100%;
+            max-width: 600px; /* Limite massimo per desktop */
+            margin: 0 auto; 
+            padding: 20px; 
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+            box-sizing: border-box; 
+        }
+
+        /* HEADER E LOGO */
+        .header-logo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .header-logo img {
+            width: 200px; 
+            height: auto;
+            margin-right: 15px;
+        }
+        .header-logo h2 {
+            margin: 0;
+            font-size: 30px; 
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        /* CAMPI FORM - MASSIMA INTERAZIONE TOUCH */
+        label {
+            display: block;
+            margin-top: 25px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            font-size: 24px; 
+        }
+        input[type="text"], input[type="email"], input[type="tel"] {
+            width: 100%; 
+            padding: 20px; 
+            border: 2px solid #ccc; 
+            border-radius: 8px; 
+            box-sizing: border-box; 
+            font-size: 26px; 
+        }
+
+        /* Testo di descrizione generale e Titoli di sezione */
+        p {
+            font-size: 22px;
+        }
+        h3 {
+            font-size: 26px;
+            margin-top: 30px;
+        }
+
+        /* Stili per le checkbox */
+        .checkbox-group {
+            margin: 30px 0;
+            padding: 15px;
+            border: 1px solid #f0f0f0;
+            border-radius: 8px;
+        }
+        .checkbox-group label {
+            display: inline;
+            font-weight: normal;
+            margin: 0;
+            font-size: 20px; 
+        }
+        input[type="checkbox"] {
+            transform: scale(1.8); 
+            margin-right: 15px;
+            vertical-align: middle;
+        }
+
+        /* PULSANTE */
+        button { 
+            background-color: #007bff; 
+            color: white; 
+            padding: 25px; 
+            margin: 40px 0 15px 0; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            width: 100%; 
+            font-size: 30px; 
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        button:hover:not(:disabled) { 
+            background-color: #0056b3; 
+        }
+        button:disabled {
+            background-color: #99c2ff;
+            cursor: not-allowed;
+        }
+
+        /* MESSAGGI DI RISPOSTA */
+        #responseMessage {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 4px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 24px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        /* Stile specifico per il link nella checkbox */
+        .checkbox-group a {
+            color: #007bff;
+            text-decoration: underline;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-logo">
+            <img src="https://www.leganavale.it/mod/aalborg_theme/pages/generic.php?filename=0970576001764957180_Progetto%20senza%20titolo.png" alt="Logo LNI Messina">
+            <h2>Richiesta di Pre-Iscrizione</h2>
+        </div>
+        <p>Compila il modulo per avviare la tua pre-iscrizione non vincolante alla LNI Messina. Riceverai un codice di riferimento via email.</p>
+
+        <form id="iscrizioneForm">
+            
+            <label for="nome">Nome *</label>
+            <input type="text" id="nome" name="nome" required>
+
+            <label for="cognome">Cognome *</label>
+            <input type="text" id="cognome" name="cognome" required>
+
+            <label for="email">Email *</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="telefono">Telefono *</label>
+            <input type="tel" id="telefono" name="telefono" required pattern="[0-9]{9,15}" title="Inserisci solo numeri, minimo 9 cifre (usato per Check-in)">
+
+            <hr>
+            
+            <h3>Consensi di Compliance</h3>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="consenso_legale" name="consenso_legale" value="Sì" required>
+                <label for="consenso_legale">
+                    Dichiaro di aver letto l'<a href="https://www.leganavale.it/mod/aalborg_theme/pages/generic.php?filename=0240685001765304986_InformativaTrattamentoDatiPersonaliRegistrazioneTelematica.pdf" target="_blank">Informativa sul Trattamento dei Dati Personali</a> e acconsento al trattamento dei dati ai fini della registrazione della domanda e accesso temporaneo ai servizi. (Obbligatorio)
+                </label>
+                <br><br>
+
+                <input type="checkbox" id="consenso_comunicazioni" name="consenso_comunicazioni" value="Sì">
+                <label for="consenso_comunicazioni">Acconsento all'invio di comunicazioni e newsletter (Facoltativo)</label>
+            </div>
+            
+            <button type="submit" id="submitButton">Registra e Invia Codice</button>
+
+            <div id="responseMessage"></div>
+        </form>
+    </div>
+
+    <script>
+        // =====================================================================
+        // COSTANTE CRITICA: URL della tua App Web DEPLOYATA su GAS (memorizzata)
+        // =====================================================================
+        const API_URL = 'https://script.google.com/macros/s/AKfycbx0mEML3X2ll6zMuvGCF4hZ8YLy_YLbgv0MZHl1GT9WwX4ZaWkjdeIaVJJka9-c0qZMYQ/exec'; 
+
+        const iscrizioneForm = document.getElementById('iscrizioneForm');
+        const responseDiv = document.getElementById('responseMessage');
+        const submitButton = document.getElementById('submitButton');
+
+        function displayMessage(message, type) {
+            responseDiv.className = type;
+            responseDiv.innerHTML = message;
+        }
+
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+            responseDiv.innerHTML = ''; 
+
+            submitButton.disabled = true; 
+            displayMessage('Invio e registrazione in corso...', 'info');
+            
+            const form = event.target;
+            const formData = new FormData(form);
+            const datiForm = {};
+
+            // Raccoglie i dati e gestisce i valori delle checkbox
+            formData.forEach((value, key) => {
+                if (key === 'consenso_legale' || key === 'consenso_comunicazioni') {
+                    // Imposta 'Sì' solo se la checkbox è stata spuntata (value è 'Sì')
+                    datiForm[key] = value === 'Sì' ? 'Sì' : 'No'; 
+                } else {
+                    datiForm[key] = value.trim();
+                }
+            });
+
+            // Gestisce le checkbox non selezionate (necessario se il value non è sempre inviato)
+            if (form.elements['consenso_legale'].checked === false) datiForm.consenso_legale = 'No';
+            if (form.elements['consenso_comunicazioni'].checked === false) datiForm.consenso_comunicazioni = 'No';
+
+
+            // Prepara il payload per l'API Apps Script (formato x-www-form-urlencoded)
+            const payload = new URLSearchParams();
+            payload.append('action', 'inviaDatiIscrizione'); 
+            payload.append('data', JSON.stringify(datiForm)); 
+
+            try {
+                // Chiamata API cross-origin a Google Apps Script
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: payload.toString() 
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Errore HTTP ${response.status}. Controlla i log di Apps Script.`);
+                }
+
+                const result = await response.json(); // La risposta è in JSON grazie a createJsonResponse in GAS
+
+                // Gestione Risposta di Business (successo/errore)
+                if (result.success) {
+                    displayMessage(
+                        `✅ Richiesta Inviata! Controlla l'email per il tuo codice di riferimento: <strong>${result.codice}</strong>.`, 
+                        'success'
+                    );
+                    form.reset(); // Pulisce il form al successo
+                } else {
+                    displayMessage(`❌ Errore: ${result.message}`, 'error');
+                }
+
+            } catch (error) {
+                console.error("Errore di Esecuzione (Network o Fetch):", error);
+                displayMessage(`⚠️ Errore critico di comunicazione: ${error.message}. Verifica Deployment e Log di Apps Script.`, 'error');
+            } finally {
+                submitButton.disabled = false; 
+            }
+        }
+
+        if (iscrizioneForm) {
+            iscrizioneForm.addEventListener('submit', handleFormSubmit);
+        }
+    </script>
+</body>
+</html>
+
+    <script src="app.js"></script>
+</body>
+</html>
