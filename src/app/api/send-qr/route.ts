@@ -7,11 +7,11 @@ export async function POST(req: Request) {
   try {
     const { email, firstName, lastName, token } = await req.json();
 
-    // Nota: L'host deve essere quello reale per il link di validazione
     const validationUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://registrazionesoci.vercel.app'}/validate/${token}`;
+    const privacyUrl = "https://www.leganavale.it/mod/aalborg_theme/pages/generic.php?filename=0240685001765304986_InformativaTrattamentoDatiPersonaliRegistrazioneTelematica.pdf";
 
     const data = await resend.emails.send({
-      from: 'LNI Messina <noreply@leganavaleitalianamessina.it>', // Nota: Richiede dominio verificato su Resend, altrimenti usa 'onboarding@resend.dev'
+      from: 'LNI Messina <onboarding@resend.dev>', // Nota: In produzione cambiare con dominio verificato
       to: [email],
       subject: `Il tuo QRCode di Accesso - LNI Messina (${firstName} ${lastName})`,
       html: `
@@ -36,6 +36,7 @@ export async function POST(req: Request) {
           </div>
           <div style="background-color: #f4f4f4; padding: 20px; text-align: center; font-size: 12px; color: #888;">
             &copy; ${new Date().getFullYear()} Lega Navale Italiana - Sezione di Messina<br>
+            <a href="${privacyUrl}" style="color: #888; text-decoration: underline;">Informativa Privacy</a><br><br>
             Questa è un'email automatica, per favore non rispondere.
           </div>
         </div>
