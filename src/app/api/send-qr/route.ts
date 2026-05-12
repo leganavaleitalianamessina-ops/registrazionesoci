@@ -1,7 +1,5 @@
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 import { NextResponse } from 'next/server';
-
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
   try {
@@ -10,9 +8,18 @@ export async function POST(req: Request) {
     const validationUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://registrazionesoci.vercel.app'}/validate/${token}`;
     const privacyUrl = "https://www.leganavale.it/mod/aalborg_theme/pages/generic.php?filename=0240685001765304986_InformativaTrattamentoDatiPersonaliRegistrazioneTelematica.pdf";
 
-    const data = await resend.emails.send({
-      from: 'LNI Messina <onboarding@resend.dev>', // Nota: In produzione cambiare con dominio verificato
-      to: [email],
+    // Configurazione del trasportatore SMTP per Gmail
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS, // La password per le app di 16 lettere
+      },
+    });
+
+    const mailOptions = {
+      from: `"LNI Messina" <${process.env.EMAIL_USER}>`,
+      to: email,
       subject: `Il tuo QRCode di Accesso - LNI Messina (${firstName} ${lastName})`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 10px; overflow: hidden;">
@@ -41,10 +48,13 @@ export async function POST(req: Request) {
           </div>
         </div>
       `,
-    });
+    };
 
-    return NextResponse.json(data);
-  } catch (error) {
-    return NextResponse.json({ error });
+    await transporter.sendMail(mailOptions);
+
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error("Errore invio email:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
