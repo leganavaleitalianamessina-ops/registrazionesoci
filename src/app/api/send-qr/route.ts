@@ -5,15 +5,24 @@ export async function POST(req: Request) {
   try {
     const { email, firstName, lastName, token } = await req.json();
 
+    console.log(`Tentativo invio email a: ${email} per ${firstName} ${lastName}`);
+
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.error("ERRORE: Variabili EMAIL_USER o EMAIL_PASS mancanti su Vercel!");
+      throw new Error("Configurazione email mancante sul server.");
+    }
+
     const validationUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://registrazionesoci.vercel.app'}/validate/${token}`;
     const privacyUrl = "https://www.leganavale.it/mod/aalborg_theme/pages/generic.php?filename=0240685001765304986_InformativaTrattamentoDatiPersonaliRegistrazioneTelematica.pdf";
 
-    // Configurazione del trasportatore SMTP per Gmail
+    // Configurazione SMTP Gmail con log di debug
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true, // use SSL
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS, // La password per le app di 16 lettere
+        pass: process.env.EMAIL_PASS,
       },
     });
 
@@ -50,11 +59,12 @@ export async function POST(req: Request) {
       `,
     };
 
-    await transporter.sendMail(mailOptions);
+    const info = await transporter.sendMail(mailOptions);
+    console.log("Email inviata con successo:", info.messageId);
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error("Errore invio email:", error);
+    console.error("ERRORE CRITICO INVIO EMAIL:", error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
