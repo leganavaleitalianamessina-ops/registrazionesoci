@@ -84,7 +84,23 @@ export default function ValidatePage() {
         </p>
       </div>
 
-      <button onClick={() => window.print()} className="button-legacy" style={{ marginTop: '40px' }}>
+      <button 
+        onClick={() => {
+          const canvas = document.querySelector('canvas');
+          if (canvas) {
+            const link = document.createElement('a');
+            link.download = `LNI_Messina_QR_${token}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+          }
+        }} 
+        className="button-legacy" 
+        style={{ marginTop: '40px' }}
+      >
+        Salva QRCode sul Telefono
+      </button>
+      
+      <button onClick={() => window.print()} className="button-legacy" style={{ backgroundColor: '#6c757d', marginTop: '10px' }}>
         Stampa / Salva PDF
       </button>
       

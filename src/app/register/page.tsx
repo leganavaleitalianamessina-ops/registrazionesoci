@@ -101,8 +101,22 @@ export default function RegisterPage() {
         <div style={{ display: 'flex', justifyContent: 'center', margin: '40px 0' }}>
           {generatedToken && <QRCodeDisplay token={generatedToken} />}
         </div>
-        <button onClick={() => window.print()} className="button-legacy">Salva QRCode</button>
-        <button onClick={() => window.location.href = '/'} className="button-legacy" style={{ backgroundColor: '#666' }}>Torna alla Home</button>
+        <button 
+          onClick={() => {
+            const canvas = document.querySelector('canvas');
+            if (canvas) {
+              const link = document.createElement('a');
+              link.download = `LNI_Messina_QR_${generatedToken}.png`;
+              link.href = canvas.toDataURL('image/png');
+              link.click();
+            }
+          }} 
+          className="button-legacy"
+        >
+          Salva QRCode sul Telefono
+        </button>
+        <button onClick={() => window.print()} className="button-legacy" style={{ backgroundColor: '#6c757d', marginTop: '10px' }}>Stampa / PDF</button>
+        <button onClick={() => window.location.href = '/'} className="button-legacy" style={{ backgroundColor: '#666', marginTop: '10px' }}>Torna alla Home</button>
       </div>
     );
   }
