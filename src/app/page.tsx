@@ -24,11 +24,11 @@ export default function HomePage() {
 
       {/* Contenitore centrato per i pulsanti */}
       <div style={{ display: 'flex', flexDirection: 'column', width: '100%', maxWidth: '600px', margin: '0 auto' }}>
-        <Link href="/register" className="button-legacy" style={{ textAlign: 'center', textDecoration: 'none', display: 'block' }}>
+        <Link href="/register" className="button-legacy-fixed">
           Richiesta Pre-Iscrizione
         </Link>
         
-        <Link href="/recover-qr" className="button-legacy" style={{ textAlign: 'center', textDecoration: 'none', display: 'block' }}>
+        <Link href="/recover-qr" className="button-legacy-fixed">
           Recupera QRCode
         </Link>
       </div>
@@ -43,7 +43,7 @@ export default function HomePage() {
           min-height: 100vh; 
           padding: 20px; 
           box-sizing: border-box; 
-          background: white; 
+          background: white !important; 
           font-family: Arial, sans-serif;
           display: flex;
           flex-direction: column;
@@ -59,23 +59,22 @@ export default function HomePage() {
           width: 100%;
           box-sizing: border-box;
         }
-        /* STILE CLONATO ESATTAMENTE DALLA PAGINA DI REGISTRAZIONE */
-        .button-legacy { 
-          background-color: #007bff; 
+        /* STILE BLINDATO IDENTICO AL PULSANTE DI REGISTRAZIONE */
+        .button-legacy-fixed { 
+          background-color: #007bff !important; 
           color: white !important; 
-          padding: 25px; 
-          margin: 20px 0; /* Spaziatura uniforme centrata */
-          border: none; 
-          border-radius: 8px; 
-          cursor: pointer; 
-          width: 100%; 
-          font-size: 30px; 
-          font-weight: bold; 
-          box-sizing: border-box;
-          -webkit-appearance: none;
-        }
-        .button-legacy:hover {
-          opacity: 0.9;
+          padding: 25px !important; 
+          margin: 15px 0 !important; 
+          border: none !important; 
+          border-radius: 8px !important; 
+          cursor: pointer !important; 
+          width: 100% !important; 
+          font-size: 30px !important; 
+          font-weight: bold !important; 
+          box-sizing: border-box !important; 
+          display: block !important;
+          text-align: center !important;
+          text-decoration: none !important;
         }
       `}</style>
     </div>
