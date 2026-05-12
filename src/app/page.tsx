@@ -23,13 +23,13 @@ export default function HomePage() {
           Benvenuti nella Web App ufficiale della Sezione di Messina.
         </p>
 
-        {/* Contenitore per i pulsanti centrati con larghezza auto */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '25px', width: '100%' }}>
-          <Link href="/register" className="button-legacy-adaptive">
+        {/* Pulsanti a larghezza piena identici alla registrazione */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%', maxWidth: '600px' }}>
+          <Link href="/register" className="button-legacy-full">
             Richiesta Pre-Iscrizione
           </Link>
           
-          <Link href="/recover-qr" className="button-legacy-adaptive">
+          <Link href="/recover-qr" className="button-legacy-full">
             Recupera QRCode
           </Link>
         </div>
@@ -69,29 +69,25 @@ export default function HomePage() {
           align-items: center;
           width: 100%;
         }
-        /* STILE ADATTIVO: Larghezza auto e centrato */
-        .button-legacy-adaptive { 
+        /* STILE CLONE REGISTRAZIONE: Larghezza 100% */
+        .button-legacy-full { 
           background-color: #007bff !important; 
           color: white !important; 
-          padding: 25px 50px !important; /* Più padding laterale per bilanciare l'auto-width */
-          margin: 0 !important; 
+          padding: 25px !important; 
+          margin: 10px 0 !important; 
           border: none !important; 
           border-radius: 8px !important; 
           cursor: pointer !important; 
-          width: auto !important; /* RICHIESTA: Larghezza adattiva */
-          min-width: 320px; /* Minimo per leggibilità su mobile */
-          max-width: 90%; /* Massimo per non uscire dallo schermo */
+          width: 100% !important; /* Larghezza piena come in registrazione */
           font-size: 30px !important; 
           font-weight: bold !important; 
           box-sizing: border-box !important; 
-          display: inline-block !important;
+          display: block !important;
           text-align: center !important;
           text-decoration: none !important;
-          box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        .button-legacy-adaptive:active {
+        .button-legacy-full:active {
           opacity: 0.9;
-          transform: translateY(2px);
         }
       `}</style>
     </div>
