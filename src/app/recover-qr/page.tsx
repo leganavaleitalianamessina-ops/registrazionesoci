@@ -17,20 +17,34 @@ export default function RecoverQRPage() {
     setError(null);
 
     try {
-      // 1. Verifica se l'utente esiste
+      // 1. Verifica se l'utente esiste e recupera il token
       const { data, error: userError } = await supabase
         .from('users')
-        .select('id, email')
+        .select('id, first_name, last_name, email, qr_tokens(token)')
         .eq('email', email)
         .single();
 
       if (userError || !data) {
-        // Per sicurezza (anti-enumeration) non diciamo se l'utente esiste o no
-        // Ma qui seguiamo la logica semplice richiesta
-        throw new Error("Email non trovata nel sistema.");
+        throw new Error("Indirizzo email non trovato.");
       }
 
-      // 2. Simulazione invio (Fase 6 implementerà l'invio reale)
+      const token = (data as any).qr_tokens[0]?.token;
+      if (!token) throw new Error("Nessun codice associato a questa email.");
+
+      // 2. Chiamata all'API di invio email
+      const response = await fetch('/api/send-qr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: data.email,
+          firstName: data.first_name,
+          lastName: data.last_name,
+          token: token,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Errore nell'invio dell'email.");
+
       setSuccess(true);
     } catch (err: any) {
       setError(err.message || 'Errore durante la ricerca.');

@@ -64,6 +64,23 @@ export default function RegisterPage() {
 
       setGeneratedToken(token);
       setSuccess(true);
+      
+      // 3. Invio email automatico
+      try {
+        await fetch('/api/send-qr', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: formData.email,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            token: token,
+          }),
+        });
+      } catch (emailErr) {
+        console.error("Errore invio email silente:", emailErr);
+        // Non blocchiamo la UI se fallisce solo l'email
+      }
     } catch (err: any) {
       setError(err.message || 'Errore di comunicazione. Riprova.');
     } finally {
