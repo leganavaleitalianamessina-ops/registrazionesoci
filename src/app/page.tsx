@@ -1,39 +1,34 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 
 export default function HomePage() {
   return (
     <div className="container-legacy">
       <div className="header-logo-legacy">
-        {/* Logo con larghezza auto e altezza fissa per mantenere le proporzioni */}
-        <div style={{ height: '100px', width: 'auto', position: 'relative' }}>
+        <div style={{ height: '100px', width: 'auto' }}>
           <img 
             src="/logo.png" 
             alt="Logo LNI Messina" 
             style={{ height: '100%', width: 'auto', display: 'block' }} 
           />
         </div>
+        <h2 style={{ fontSize: '30px', fontWeight: 'bold', color: '#007bff', marginLeft: '15px', margin: 0 }}>
+          LNI MESSINA
+        </h2>
       </div>
       
-      <h1 style={{ textAlign: 'center', fontSize: '38px', fontWeight: '900', color: '#003366', marginTop: '20px', marginBottom: '10px' }}>
-        LNI MESSINA
-      </h1>
-      
-      <p style={{ textAlign: 'center', margin: '20px 0 40px 0', fontSize: '24px', color: '#333', lineHeight: '1.3' }}>
-        Benvenuti nella Web App ufficiale.<br/>
-        Seleziona un'operazione:
+      <p style={{ textAlign: 'center', margin: '40px 0', fontSize: '24px', fontWeight: 'bold', color: '#333' }}>
+        Benvenuti nella Web App ufficiale della Sezione di Messina.
       </p>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '25px', width: '100%' }}>
-        {/* Pulsante Pre-Iscrizione: Blu con Scritta Bianca */}
-        <Link href="/register" className="button-legacy-blue">
+      {/* Contenitore centrato per i pulsanti */}
+      <div style={{ display: 'flex', flexDirection: 'column', width: '100%', maxWidth: '600px', margin: '0 auto' }}>
+        <Link href="/register" className="button-legacy" style={{ textAlign: 'center', textDecoration: 'none', display: 'block' }}>
           Richiesta Pre-Iscrizione
         </Link>
         
-        {/* Pulsante Recupero: Blu con Scritta Bianca */}
-        <Link href="/recover-qr" className="button-legacy-blue">
+        <Link href="/recover-qr" className="button-legacy" style={{ textAlign: 'center', textDecoration: 'none', display: 'block' }}>
           Recupera QRCode
         </Link>
       </div>
@@ -52,35 +47,35 @@ export default function HomePage() {
           font-family: Arial, sans-serif;
           display: flex;
           flex-direction: column;
-          align-items: center;
+          align-items: center; 
         }
         .header-logo-legacy { 
           display: flex; 
           align-items: center; 
           justify-content: center; 
-          margin-bottom: 20px; 
+          margin-bottom: 25px; 
+          padding-bottom: 15px; 
+          border-bottom: 1px solid #eee; 
           width: 100%;
+          box-sizing: border-box;
         }
-        .button-legacy-blue { 
-          background-color: #003366; /* Blu LNI */
+        /* STILE CLONATO ESATTAMENTE DALLA PAGINA DI REGISTRAZIONE */
+        .button-legacy { 
+          background-color: #007bff; 
           color: white !important; 
-          padding: 35px 20px; 
+          padding: 25px; 
+          margin: 20px 0; /* Spaziatura uniforme centrata */
           border: none; 
-          border-radius: 15px; 
+          border-radius: 8px; 
           cursor: pointer; 
           width: 100%; 
-          font-size: 32px; 
+          font-size: 30px; 
           font-weight: bold; 
-          box-sizing: border-box; 
-          display: block; 
-          text-align: center; 
-          text-decoration: none;
-          box-shadow: 0 10px 20px rgba(0,51,102,0.2);
-          transition: transform 0.2s;
+          box-sizing: border-box;
+          -webkit-appearance: none;
         }
-        .button-legacy-blue:active {
-          transform: scale(0.98);
-          background-color: #002244;
+        .button-legacy:hover {
+          opacity: 0.9;
         }
       `}</style>
     </div>

@@ -49,7 +49,13 @@ export default function CheckinPage() {
   return (
     <div className="container-legacy">
       <div className="header-logo-legacy">
-        <Image src="/logo.png" alt="Logo" width={60} height={60} />
+        <div style={{ height: '60px', width: 'auto' }}>
+          <img 
+            src="/logo.png" 
+            alt="Logo" 
+            style={{ height: '100%', width: 'auto', display: 'block' }} 
+          />
+        </div>
         <h2>Scanner Check-in</h2>
       </div>
 

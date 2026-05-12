@@ -59,7 +59,13 @@ export default function RecoverQRPage() {
   return (
     <div className="container-legacy">
       <div className="header-logo-legacy">
-        <Image src="/logo.png" alt="Logo LNI Messina" width={80} height={80} />
+        <div style={{ height: '80px', width: 'auto' }}>
+          <img 
+            src="/logo.png" 
+            alt="Logo LNI" 
+            style={{ height: '100%', width: 'auto', display: 'block' }} 
+          />
+        </div>
         <h2>Recupero QRCode</h2>
       </div>
       
