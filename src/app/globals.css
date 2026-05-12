@@ -47,7 +47,7 @@ body {
   cursor: pointer !important;
   width: 100% !important;
   max-width: 600px; /* Limite per non farlo diventare troppo largo su desktop */
-  font-size: 30px !important;
+  font-size: 26px !important; /* Ridotto leggermente per migliore estetica */
   font-weight: bold !important;
   box-sizing: border-box !important;
   display: block !important;
