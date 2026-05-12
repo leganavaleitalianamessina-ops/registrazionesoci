@@ -18,19 +18,21 @@ export default function HomePage() {
         </h2>
       </div>
       
-      <p style={{ textAlign: 'center', margin: '40px 0', fontSize: '24px', fontWeight: 'bold', color: '#333' }}>
-        Benvenuti nella Web App ufficiale della Sezione di Messina.
-      </p>
+      <div className="content-center">
+        <p style={{ textAlign: 'center', margin: '40px 0', fontSize: '24px', fontWeight: 'bold', color: '#333' }}>
+          Benvenuti nella Web App ufficiale della Sezione di Messina.
+        </p>
 
-      {/* Contenitore centrato per i pulsanti */}
-      <div style={{ display: 'flex', flexDirection: 'column', width: '100%', maxWidth: '600px', margin: '0 auto' }}>
-        <Link href="/register" className="button-legacy-fixed">
-          Richiesta Pre-Iscrizione
-        </Link>
-        
-        <Link href="/recover-qr" className="button-legacy-fixed">
-          Recupera QRCode
-        </Link>
+        {/* Contenitore per i pulsanti centrati con larghezza auto */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '25px', width: '100%' }}>
+          <Link href="/register" className="button-legacy-adaptive">
+            Richiesta Pre-Iscrizione
+          </Link>
+          
+          <Link href="/recover-qr" className="button-legacy-adaptive">
+            Recupera QRCode
+          </Link>
+        </div>
       </div>
 
       <footer style={{ marginTop: 'auto', padding: '40px 0', textAlign: 'center', color: '#888', fontSize: '18px' }}>
@@ -43,7 +45,7 @@ export default function HomePage() {
           min-height: 100vh; 
           padding: 20px; 
           box-sizing: border-box; 
-          background: white !important; 
+          background: white; 
           font-family: Arial, sans-serif;
           display: flex;
           flex-direction: column;
@@ -59,22 +61,37 @@ export default function HomePage() {
           width: 100%;
           box-sizing: border-box;
         }
-        /* STILE BLINDATO IDENTICO AL PULSANTE DI REGISTRAZIONE */
-        .button-legacy-fixed { 
+        .content-center {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          width: 100%;
+        }
+        /* STILE ADATTIVO: Larghezza auto e centrato */
+        .button-legacy-adaptive { 
           background-color: #007bff !important; 
           color: white !important; 
-          padding: 25px !important; 
-          margin: 15px 0 !important; 
+          padding: 25px 50px !important; /* Più padding laterale per bilanciare l'auto-width */
+          margin: 0 !important; 
           border: none !important; 
           border-radius: 8px !important; 
           cursor: pointer !important; 
-          width: 100% !important; 
+          width: auto !important; /* RICHIESTA: Larghezza adattiva */
+          min-width: 320px; /* Minimo per leggibilità su mobile */
+          max-width: 90%; /* Massimo per non uscire dallo schermo */
           font-size: 30px !important; 
           font-weight: bold !important; 
           box-sizing: border-box !important; 
-          display: block !important;
+          display: inline-block !important;
           text-align: center !important;
           text-decoration: none !important;
+          box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .button-legacy-adaptive:active {
+          opacity: 0.9;
+          transform: translateY(2px);
         }
       `}</style>
     </div>
