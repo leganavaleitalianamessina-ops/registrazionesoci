@@ -35,14 +35,30 @@ export default function RegisterPage() {
     setError(null);
 
     try {
+      // 0. Normalizzazione dati
+      const cleanEmail = formData.email.trim().toLowerCase();
+      const cleanFirstName = formData.firstName.trim().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+      const cleanLastName = formData.lastName.trim().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+
+      // 1. Verifica se l'email esiste già
+      const { data: existingUser } = await supabase
+        .from('users')
+        .select('id')
+        .eq('email', cleanEmail)
+        .maybeSingle();
+
+      if (existingUser) {
+        throw new Error("Questa email è già registrata. Usa la funzione 'Recupera QRCode' nella Home Page.");
+      }
+
       const { data: userData, error: userError } = await supabase
         .from('users')
         .insert([
           {
-            first_name: formData.firstName,
-            last_name: formData.lastName,
-            email: formData.email,
-            phone: formData.phone,
+            first_name: cleanFirstName,
+            last_name: cleanLastName,
+            email: cleanEmail,
+            phone: formData.phone.trim(),
             user_type: 'pre_member',
             status: 'active',
             gdpr_consent: formData.gdprConsent,
