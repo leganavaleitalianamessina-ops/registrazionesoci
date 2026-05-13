@@ -107,10 +107,54 @@ ALTER TABLE admin_users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE audit_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE households ENABLE ROW LEVEL SECURITY;
 
--- Policy examples (simplified, to be refined based on auth roles)
--- Admin Full can do everything
--- Checkin Operator can read basic user info and write checkin logs
+-- Helper: security definer function to get admin role (avoids recursion)
+CREATE OR REPLACE FUNCTION get_admin_role()
+RETURNS TEXT AS $$
+DECLARE
+    user_role TEXT;
+BEGIN
+    SELECT role INTO user_role FROM public.admin_users WHERE id = auth.uid();
+    RETURN user_role;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
 
--- Example policy for admin_users (only admins can see this table)
-CREATE POLICY "Admins can view admin roles" ON admin_users
-    FOR SELECT USING (auth.uid() IN (SELECT id FROM admin_users WHERE role = 'admin_full'));
+-- ADMIN_USERS policies
+DROP POLICY IF EXISTS "Admins can view admin roles" ON admin_users;
+CREATE POLICY "Users can see own role" ON admin_users
+    FOR SELECT USING (auth.uid() = id);
+CREATE POLICY "Admin full can manage admin_users" ON admin_users
+    FOR ALL USING (get_admin_role() = 'admin_full');
+
+-- USERS policies
+-- Anyone can insert (public registration)
+CREATE POLICY "Anyone can register" ON users
+    FOR INSERT WITH CHECK (auth.role() = 'anon' OR get_admin_role() = 'admin_full');
+-- Admin full can do everything on users
+CREATE POLICY "Admin full manages users" ON users
+    FOR ALL USING (get_admin_role() = 'admin_full');
+-- Checkin operator can read basic user info
+CREATE POLICY "Operator can read users" ON users
+    FOR SELECT USING (get_admin_role() IN ('checkin_operator', 'admin_monitor', 'admin_full'));
+
+-- QR_TOKENS policies
+CREATE POLICY "Admin full manages tokens" ON qr_tokens
+    FOR ALL USING (get_admin_role() = 'admin_full');
+-- Operator can read tokens for validation
+CREATE POLICY "Operator can read tokens" ON qr_tokens
+    FOR SELECT USING (get_admin_role() IN ('checkin_operator', 'admin_monitor', 'admin_full'));
+
+-- CHECKIN_LOGS policies
+-- Anyone can insert (from scanner)
+CREATE POLICY "Anyone can log checkin" ON checkin_logs
+    FOR INSERT WITH CHECK (true);
+-- Admin/Operator can read logs
+CREATE POLICY "Admin can read logs" ON checkin_logs
+    FOR SELECT USING (get_admin_role() IN ('checkin_operator', 'admin_monitor', 'admin_full'));
+
+-- AUDIT_LOGS policies
+CREATE POLICY "Admin full can manage audit" ON audit_logs
+    FOR ALL USING (get_admin_role() = 'admin_full');
+
+-- HOUSEHOLDS policies
+CREATE POLICY "Admin full can manage households" ON households
+    FOR ALL USING (get_admin_role() = 'admin_full');
