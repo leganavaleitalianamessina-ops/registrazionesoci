@@ -164,6 +164,8 @@ export default function CheckinPage() {
 
       <footer style={{ marginTop: 'auto', padding: '20px', textAlign: 'center', color: '#888' }}>
         Sistema di Verifica LNI Messina
+        <br />
+        <a href="/operator/accessi" style={{ color: '#007bff', fontSize: '14px', textDecoration: 'none' }}>Registro Accessi Operatori</a>
       </footer>
 
       <style jsx>{`
