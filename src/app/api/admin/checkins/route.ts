@@ -1,33 +1,37 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
-async function checkAdmin(supabase: any): Promise<string | null> {
+function createAuthClient(token: string) {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+    { global: { headers: { Authorization: `Bearer ${token}` } } }
+  )
+}
+
+async function checkAdmin(token: string): Promise<string | null> {
+  const supabase = createAuthClient(token)
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
-
-  const { data } = await supabase
-    .from('admin_users')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
+  const { data } = await supabase.from('admin_users').select('role').eq('id', user.id).single()
   return data?.role || null
 }
 
 export async function GET(req: Request) {
-  const supabase = createRouteHandlerClient({ cookies })
-  const role = await checkAdmin(supabase)
+  const token = req.headers.get('authorization')?.replace('Bearer ', '')
+  if (!token) return NextResponse.json({ error: 'Non autorizzato' }, { status: 401 })
+
+  const role = await checkAdmin(token)
   if (!role || role === 'checkin_operator') {
     return NextResponse.json({ error: 'Non autorizzato' }, { status: 403 })
   }
 
+  const supabase = createAuthClient(token)
   const { searchParams } = new URL(req.url)
   const date = searchParams.get('date') || new Date().toISOString().split('T')[0]
   const range = searchParams.get('range') || 'day'
 
-  let fromDate: string
-  let toDate: string
+  let fromDate: string, toDate: string
 
   if (range === '24h') {
     fromDate = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()

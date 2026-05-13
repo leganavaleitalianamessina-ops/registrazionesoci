@@ -12,6 +12,14 @@ interface CheckinLog {
   users: { first_name: string; last_name: string } | null;
 }
 
+async function apiFetch(path: string, options?: RequestInit) {
+  const { data: { session } } = await supabase.auth.getSession()
+  return fetch(path, {
+    ...options,
+    headers: { 'Authorization': `Bearer ${session?.access_token}`, ...options?.headers },
+  })
+}
+
 export default function OperatorCheckinsPage() {
   const router = useRouter()
   const [logs, setLogs] = useState<CheckinLog[]>([])
@@ -20,7 +28,7 @@ export default function OperatorCheckinsPage() {
 
   const fetchCheckins = async () => {
     setLoading(true)
-    const res = await fetch('/api/admin/checkins?range=24h')
+    const res = await apiFetch('/api/admin/checkins?range=24h')
     const data = await res.json()
     setLogs(data.logs || [])
     setTotal(data.total || 0)
@@ -44,16 +52,11 @@ export default function OperatorCheckinsPage() {
           <img src="/logo.png" alt="Logo" style={{ height: '40px', width: 'auto' }} />
           <h1 style={{ fontSize: '18px', margin: 0 }}>Monitoraggio Operatori — Ultime 24h</h1>
         </div>
-        <button onClick={handleLogout} style={{ padding: '8px 16px', background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px' }}>
-          Esci
-        </button>
+        <button onClick={handleLogout} style={{ padding: '8px 16px', background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px' }}>Esci</button>
       </div>
 
       <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
-        <div style={{
-          background: '#28a745', color: 'white', borderRadius: '12px', padding: '20px',
-          textAlign: 'center', marginBottom: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-        }}>
+        <div style={{ background: '#28a745', color: 'white', borderRadius: '12px', padding: '20px', textAlign: 'center', marginBottom: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
           <div style={{ fontSize: '48px', fontWeight: 'bold' }}>{total}</div>
           <div style={{ fontSize: '18px', opacity: 0.9 }}>Accessi totali nelle ultime 24 ore</div>
         </div>
@@ -61,9 +64,7 @@ export default function OperatorCheckinsPage() {
         <button onClick={fetchCheckins} style={{
           width: '100%', padding: '14px', background: '#007bff', color: 'white', border: 'none',
           borderRadius: '10px', fontSize: '17px', fontWeight: 'bold', cursor: 'pointer', marginBottom: '20px'
-        }}>
-          Aggiorna
-        </button>
+        }}>Aggiorna</button>
 
         {loading ? (
           <p style={{ textAlign: 'center', fontSize: '20px', padding: '40px', color: '#888' }}>Caricamento...</p>
@@ -86,10 +87,7 @@ export default function OperatorCheckinsPage() {
                     {new Date(l.created_at).toLocaleString('it-IT')}
                   </div>
                 </div>
-                <div style={{
-                  fontSize: '13px', padding: '4px 10px', borderRadius: '20px',
-                  background: resultColor(l.checkin_result), color: 'white', fontWeight: 'bold'
-                }}>
+                <div style={{ fontSize: '13px', padding: '4px 10px', borderRadius: '20px', background: resultColor(l.checkin_result), color: 'white', fontWeight: 'bold' }}>
                   {l.checkin_result}
                 </div>
               </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
 
 interface CheckinLog {
   id: string;
@@ -9,6 +10,14 @@ interface CheckinLog {
   device_info: string;
   created_at: string;
   users: { first_name: string; last_name: string; email: string } | null;
+}
+
+async function apiFetch(path: string, options?: RequestInit) {
+  const { data: { session } } = await supabase.auth.getSession()
+  return fetch(path, {
+    ...options,
+    headers: { 'Authorization': `Bearer ${session?.access_token}`, ...options?.headers },
+  })
 }
 
 export default function AdminCheckinsPage() {
@@ -23,8 +32,8 @@ export default function AdminCheckinsPage() {
   const fetchCheckins = async (d: string) => {
     setLoading(true)
     const [dayRes, monthRes] = await Promise.all([
-      fetch(`/api/admin/checkins?date=${d}&range=day`),
-      fetch(`/api/admin/checkins?date=${d}&range=month`),
+      apiFetch(`/api/admin/checkins?date=${d}&range=day`),
+      apiFetch(`/api/admin/checkins?date=${d}&range=month`),
     ])
     const dayData = await dayRes.json()
     const monthData = await monthRes.json()
@@ -43,24 +52,22 @@ export default function AdminCheckinsPage() {
   return (
     <div style={{ width: '100%', minHeight: '100vh', background: '#f0f2f5', fontFamily: 'Arial, sans-serif' }}>
       <div style={{ background: '#003366', color: 'white', padding: '15px 20px', display: 'flex', alignItems: 'center', gap: '15px' }}>
-        <button onClick={() => window.location.href = '/admin'} style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', borderRadius: '8px', padding: '8px 16px', cursor: 'pointer', fontSize: '16px' }}>← Indietro</button>
+        <a href="/admin" style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', borderRadius: '8px', padding: '8px 16px', cursor: 'pointer', fontSize: '16px', textDecoration: 'none' }}>← Indietro</a>
         <h1 style={{ fontSize: '20px', margin: 0 }}>Visualizza Ingressi</h1>
       </div>
 
       <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-        <div style={{ display: 'flex', gap: '15px', alignItems: 'end', flexWrap: 'wrap', marginBottom: '25px' }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', color: '#555', marginBottom: '5px' }}>Seleziona Data</label>
-            <input type="date" value={date} onChange={e => { setDate(e.target.value); fetchCheckins(e.target.value) }}
-              style={{ padding: '12px 16px', border: '2px solid #ddd', borderRadius: '10px', fontSize: '17px' }} />
-          </div>
+        <div style={{ marginBottom: '25px' }}>
+          <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', color: '#555', marginBottom: '5px' }}>Seleziona Data</label>
+          <input type="date" value={date} onChange={e => { setDate(e.target.value); fetchCheckins(e.target.value) }}
+            style={{ padding: '12px 16px', border: '2px solid #ddd', borderRadius: '10px', fontSize: '17px' }} />
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '15px', marginBottom: '25px' }}>
           <StatCard value={total} label={`Ingressi del ${date}`} color="#007bff" />
           <StatCard value={success} label="Check-in Riusciti" color="#28a745" />
           <StatCard value={total - success} label="Non Riusciti" color="#dc3545" />
-          <StatCard value={monthTotal} label={`Ingressi del Mese`} color="#ffc107" />
+          <StatCard value={monthTotal} label="Ingressi del Mese" color="#ffc107" />
         </div>
 
         {loading ? (

@@ -1,27 +1,32 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
-async function checkAdmin(supabase: any): Promise<string | null> {
+function createAuthClient(token: string) {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+    { global: { headers: { Authorization: `Bearer ${token}` } } }
+  )
+}
+
+async function checkAdmin(token: string): Promise<string | null> {
+  const supabase = createAuthClient(token)
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
-
-  const { data } = await supabase
-    .from('admin_users')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
+  const { data } = await supabase.from('admin_users').select('role').eq('id', user.id).single()
   return data?.role || null
 }
 
-export async function GET() {
-  const supabase = createRouteHandlerClient({ cookies })
-  const role = await checkAdmin(supabase)
+export async function GET(req: Request) {
+  const token = req.headers.get('authorization')?.replace('Bearer ', '')
+  if (!token) return NextResponse.json({ error: 'Non autorizzato' }, { status: 401 })
+
+  const role = await checkAdmin(token)
   if (!role || role === 'checkin_operator') {
     return NextResponse.json({ error: 'Non autorizzato' }, { status: 403 })
   }
 
+  const supabase = createAuthClient(token)
   const { data, error } = await supabase
     .from('users')
     .select('*, qr_tokens(token, is_active, created_at)')
@@ -32,12 +37,13 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const supabase = createRouteHandlerClient({ cookies })
-  const role = await checkAdmin(supabase)
-  if (role !== 'admin_full') {
-    return NextResponse.json({ error: 'Non autorizzato' }, { status: 403 })
-  }
+  const token = req.headers.get('authorization')?.replace('Bearer ', '')
+  if (!token) return NextResponse.json({ error: 'Non autorizzato' }, { status: 401 })
 
+  const role = await checkAdmin(token)
+  if (role !== 'admin_full') return NextResponse.json({ error: 'Non autorizzato' }, { status: 403 })
+
+  const supabase = createAuthClient(token)
   const body = await req.json()
   const { first_name, last_name, email, phone, user_type, gdpr_consent, marketing_consent } = body
 
@@ -58,19 +64,20 @@ export async function POST(req: Request) {
 
   if (userError) return NextResponse.json({ error: userError.message }, { status: 500 })
 
-  const token = Math.random().toString(36).substring(2, 10).toUpperCase()
-  await supabase.from('qr_tokens').insert({ user_id: userData.id, token, is_active: true })
+  const tokenVal = Math.random().toString(36).substring(2, 10).toUpperCase()
+  await supabase.from('qr_tokens').insert({ user_id: userData.id, token: tokenVal, is_active: true })
 
   return NextResponse.json(userData)
 }
 
 export async function PUT(req: Request) {
-  const supabase = createRouteHandlerClient({ cookies })
-  const role = await checkAdmin(supabase)
-  if (role !== 'admin_full') {
-    return NextResponse.json({ error: 'Non autorizzato' }, { status: 403 })
-  }
+  const token = req.headers.get('authorization')?.replace('Bearer ', '')
+  if (!token) return NextResponse.json({ error: 'Non autorizzato' }, { status: 401 })
 
+  const role = await checkAdmin(token)
+  if (role !== 'admin_full') return NextResponse.json({ error: 'Non autorizzato' }, { status: 403 })
+
+  const supabase = createAuthClient(token)
   const body = await req.json()
   const { id, ...updateData } = body
 
@@ -86,12 +93,13 @@ export async function PUT(req: Request) {
 }
 
 export async function DELETE(req: Request) {
-  const supabase = createRouteHandlerClient({ cookies })
-  const role = await checkAdmin(supabase)
-  if (role !== 'admin_full') {
-    return NextResponse.json({ error: 'Non autorizzato' }, { status: 403 })
-  }
+  const token = req.headers.get('authorization')?.replace('Bearer ', '')
+  if (!token) return NextResponse.json({ error: 'Non autorizzato' }, { status: 401 })
 
+  const role = await checkAdmin(token)
+  if (role !== 'admin_full') return NextResponse.json({ error: 'Non autorizzato' }, { status: 403 })
+
+  const supabase = createAuthClient(token)
   const { searchParams } = new URL(req.url)
   const id = searchParams.get('id')
 

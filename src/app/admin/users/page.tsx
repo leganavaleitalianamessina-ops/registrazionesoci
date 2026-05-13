@@ -13,9 +13,20 @@ interface User {
   status: 'active' | 'expired' | 'revoked';
   gdpr_consent: boolean;
   marketing_consent: boolean;
-  expiration_date: string | null;
   created_at: string;
   qr_tokens?: { token: string; is_active: boolean; created_at: string }[];
+}
+
+async function apiFetch(path: string, options?: RequestInit) {
+  const { data: { session } } = await supabase.auth.getSession()
+  return fetch(path, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${session?.access_token}`,
+      ...options?.headers,
+    },
+  })
 }
 
 export default function AdminUsersPage() {
@@ -27,7 +38,7 @@ export default function AdminUsersPage() {
   const [form, setForm] = useState({ first_name: '', last_name: '', email: '', phone: '', user_type: 'active_member' as string });
 
   const fetchUsers = async () => {
-    const res = await fetch('/api/admin/users')
+    const res = await apiFetch('/api/admin/users')
     if (res.ok) setUsers(await res.json())
     setLoading(false)
   }
@@ -37,15 +48,13 @@ export default function AdminUsersPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (editingUser) {
-      await fetch('/api/admin/users', {
+      await apiFetch('/api/admin/users', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: editingUser.id, ...form }),
       })
     } else {
-      await fetch('/api/admin/users', {
+      await apiFetch('/api/admin/users', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       })
     }
@@ -57,7 +66,7 @@ export default function AdminUsersPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Eliminare definitivamente questo utente?')) return
-    await fetch(`/api/admin/users?id=${id}`, { method: 'DELETE' })
+    await apiFetch(`/api/admin/users?id=${id}`, { method: 'DELETE' })
     fetchUsers()
   }
 
@@ -68,23 +77,20 @@ export default function AdminUsersPage() {
   }
 
   const statusColor = (s: string) => s === 'active' ? '#28a745' : s === 'expired' ? '#ffc107' : '#dc3545'
-
   const filtered = users.filter(u =>
     `${u.first_name} ${u.last_name} ${u.email}`.toLowerCase().includes(search.toLowerCase())
   )
 
-  if (loading) return <div style={{ width: '100%', minHeight: '100vh', background: '#f0f2f5', fontFamily: 'Arial, sans-serif' }}><p style={{ textAlign: 'center', fontSize: '24px', padding: '60px' }}>Caricamento...</p></div>
+  if (loading) return <div style={{ textAlign: 'center', fontSize: '24px', padding: '60px', background: '#f0f2f5', minHeight: '100vh', fontFamily: 'Arial, sans-serif' }}>Caricamento...</div>
 
   return (
     <div style={{ width: '100%', minHeight: '100vh', background: '#f0f2f5', fontFamily: 'Arial, sans-serif' }}>
-      <Header onBack={() => window.location.href = '/admin'} title="Gestione Utenti" />
+      <Header title="Gestione Utenti" />
 
       <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
         <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
-          <input
-            placeholder="Cerca nome, cognome o email..." value={search} onChange={e => setSearch(e.target.value)}
-            style={{ flex: 1, minWidth: '200px', padding: '14px 18px', border: '2px solid #ddd', borderRadius: '10px', fontSize: '17px' }}
-          />
+          <input placeholder="Cerca nome, cognome o email..." value={search} onChange={e => setSearch(e.target.value)}
+            style={{ flex: 1, minWidth: '200px', padding: '14px 18px', border: '2px solid #ddd', borderRadius: '10px', fontSize: '17px' }} />
           <button onClick={() => { setEditingUser(null); setForm({ first_name: '', last_name: '', email: '', phone: '', user_type: 'active_member' }); setShowForm(true) }}
             style={{ padding: '14px 30px', background: '#007bff', color: 'white', border: 'none', borderRadius: '10px', fontSize: '17px', fontWeight: 'bold', cursor: 'pointer' }}>
             + Nuovo Socio
@@ -145,9 +151,7 @@ export default function AdminUsersPage() {
                         <span style={{ fontFamily: 'monospace', fontSize: '14px', color: '#003366' }}>
                           {u.qr_tokens.find(t => t.is_active)?.token}
                         </span>
-                      ) : (
-                        <span style={{ color: '#999' }}>Nessuno</span>
-                      )}
+                      ) : <span style={{ color: '#999' }}>Nessuno</span>}
                     </td>
                     <td style={td}>
                       <div style={{ display: 'flex', gap: '8px' }}>
@@ -166,10 +170,10 @@ export default function AdminUsersPage() {
   )
 }
 
-function Header({ onBack, title }: { onBack: () => void; title: string }) {
+function Header({ title }: { title: string }) {
   return (
     <div style={{ background: '#003366', color: 'white', padding: '15px 20px', display: 'flex', alignItems: 'center', gap: '15px' }}>
-      <button onClick={onBack} style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', borderRadius: '8px', padding: '8px 16px', cursor: 'pointer', fontSize: '16px' }}>← Indietro</button>
+      <a href="/admin" style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', borderRadius: '8px', padding: '8px 16px', cursor: 'pointer', fontSize: '16px', textDecoration: 'none' }}>← Indietro</a>
       <h1 style={{ fontSize: '20px', margin: 0 }}>{title}</h1>
     </div>
   )
@@ -177,5 +181,4 @@ function Header({ onBack, title }: { onBack: () => void; title: string }) {
 
 const th: React.CSSProperties = { padding: '14px 12px', textAlign: 'left', fontSize: '15px', whiteSpace: 'nowrap' }
 const td: React.CSSProperties = { padding: '12px', fontSize: '15px' }
-
 const inputStyle: React.CSSProperties = { padding: '12px 14px', border: '2px solid #ddd', borderRadius: '8px', fontSize: '16px', width: '100%', boxSizing: 'border-box' }
