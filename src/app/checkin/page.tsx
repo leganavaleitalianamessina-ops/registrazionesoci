@@ -63,9 +63,20 @@ export default function CheckinPage() {
           .eq('token', token)
           .single();
 
+        const deviceInfo = navigator.userAgent || 'unknown';
+
+        const logCheckin = async (userId: string | null, result: string) => {
+          await supabase.from('checkin_logs').insert({
+            user_id: userId,
+            checkin_result: result,
+            device_info: deviceInfo,
+          });
+        };
+
         if (error || !data) {
           playSound(false);
           setScanResult({ success: false, message: "NON VALIDO", sub: "Codice non trovato" });
+          await logCheckin(null, 'NOT_FOUND');
         } else {
           const user = data.users;
           const isExpired = new Date(user.expiration_date) < new Date();
@@ -73,6 +84,7 @@ export default function CheckinPage() {
           if (isExpired) {
             playSound(false);
             setScanResult({ success: false, message: "SCADUTO", sub: `Valido fino al ${new Date(user.expiration_date).toLocaleDateString()}` });
+            await logCheckin(user.id, 'EXPIRED');
           } else {
             playSound(true);
             setScanResult({ 
@@ -82,12 +94,7 @@ export default function CheckinPage() {
               type: user.user_type === 'pre_member' ? 'Pre-Iscrizione' : 'Socio'
             });
 
-            // Log dell'accesso nel DB
-            await supabase.from('checkin_logs').insert([{ 
-              user_id: user.id, 
-              checkin_result: 'SUCCESS',
-              notes: 'Accesso via Web Scanner' 
-            }]);
+            await logCheckin(user.id, 'SUCCESS');
           }
         }
       } catch (e: any) {
