@@ -4,14 +4,12 @@ import React, { useState } from 'react';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
-import { Turnstile } from '@marsidev/react-turnstile';
 
 export default function RecoverQRPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState('');
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,7 +42,6 @@ export default function RecoverQRPage() {
            firstName: data.first_name,
            lastName: data.last_name,
            token: token,
-           turnstileToken: turnstileToken,
          }),
        });
 
@@ -103,14 +100,7 @@ export default function RecoverQRPage() {
 
         {error && <div style={{ color: 'red', fontSize: '22px', marginTop: '20px', textAlign: 'center' }}>❌ {error}</div>}
         
-        <div style={{ marginTop: '20px', textAlign: 'center' }}>
-          <Turnstile
-            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
-            onSuccess={setTurnstileToken}
-          />
-        </div>
-        
-        <button type="submit" disabled={loading || !turnstileToken} className="button-legacy">
+        <button type="submit" disabled={loading} className="button-legacy">
           {loading ? 'Ricerca in corso...' : 'Invia QRCode'}
         </button>
 

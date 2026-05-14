@@ -3,13 +3,11 @@
 import React, { useState } from 'react';
 import { CheckCircle2, Loader2, Mail } from 'lucide-react';
 import Image from 'next/image';
-import { Turnstile } from '@marsidev/react-turnstile';
 
 export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -48,7 +46,6 @@ export default function RegisterPage() {
           phone: formData.phone.trim(),
           gdprConsent: formData.gdprConsent,
           marketingConsent: formData.marketingConsent,
-          turnstileToken: turnstileToken,
         }),
       });
 
@@ -164,15 +161,8 @@ export default function RegisterPage() {
         </div>
 
         {error && <div style={{ color: 'red', fontSize: '24px', textAlign: 'center', margin: '20px 0' }}>❌ {error}</div>}
-        
-        <div style={{ marginTop: '20px', textAlign: 'center' }}>
-          <Turnstile
-            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
-            onSuccess={setTurnstileToken}
-          />
-        </div>
-        
-        <button type="submit" disabled={loading || !turnstileToken} className="button-legacy">
+
+        <button type="submit" disabled={loading} className="button-legacy">
           {loading ? 'Invio in corso...' : 'Registrati e ricevi email di conferma'}
         </button>
       </form>

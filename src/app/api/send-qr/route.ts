@@ -6,20 +6,7 @@ const privacyUrl = "https://www.leganavale.it/mod/aalborg_theme/pages/generic.ph
 
 export async function POST(req: Request) {
   try {
-    const { email, firstName, lastName, token, type, confirmToken, userId, turnstileToken } = await req.json();
-
-    // Verify Turnstile if provided (protects recover-qr, confirm-email doesn't send one)
-    if (turnstileToken) {
-      const turnstileRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ secret: process.env.TURNSTILE_SECRET_KEY, response: turnstileToken }),
-      });
-      const turnstileData = await turnstileRes.json();
-      if (!turnstileData.success) {
-        return NextResponse.json({ error: 'Verifica Captcha fallita. Ricarica la pagina e riprova.' }, { status: 403 });
-      }
-    }
+    const { email, firstName, lastName, token, type, confirmToken, userId } = await req.json();
 
     if (!email || !firstName || !lastName) {
       return NextResponse.json({ error: 'Parametri mancanti.' }, { status: 400 });
