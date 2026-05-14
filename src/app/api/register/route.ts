@@ -15,7 +15,21 @@ function getClientIp(req: NextRequest): string {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { firstName, lastName, email, phone, gdprConsent, marketingConsent } = body;
+    const { firstName, lastName, email, phone, gdprConsent, marketingConsent, turnstileToken } = body;
+
+    // Verify Turnstile captcha
+    if (!turnstileToken) {
+      return NextResponse.json({ error: 'Verifica Captcha mancante. Ricarica la pagina e riprova.' }, { status: 403 });
+    }
+    const turnstileRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret: process.env.TURNSTILE_SECRET_KEY, response: turnstileToken }),
+    });
+    const turnstileData = await turnstileRes.json();
+    if (!turnstileData.success) {
+      return NextResponse.json({ error: 'Verifica Captcha fallita. Ricarica la pagina e riprova.' }, { status: 403 });
+    }
 
     const cleanEmail = email.trim().toLowerCase();
     const cleanFirstName = firstName.trim();

@@ -4,12 +4,14 @@ import React, { useState } from 'react';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
+import { Turnstile } from '@marsidev/react-turnstile';
 
 export default function RecoverQRPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,16 +36,17 @@ export default function RecoverQRPage() {
       if (!token) throw new Error("Nessun codice associato a questa email.");
 
       // 2. Chiamata all'API di invio email
-      const response = await fetch('/api/send-qr', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: data.email,
-          firstName: data.first_name,
-          lastName: data.last_name,
-          token: token,
-        }),
-      });
+       const response = await fetch('/api/send-qr', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({
+           email: data.email,
+           firstName: data.first_name,
+           lastName: data.last_name,
+           token: token,
+           turnstileToken: turnstileToken,
+         }),
+       });
 
       if (!response.ok) throw new Error("Errore nell'invio dell'email.");
 
@@ -99,9 +102,16 @@ export default function RecoverQRPage() {
         />
 
         {error && <div style={{ color: 'red', fontSize: '22px', marginTop: '20px', textAlign: 'center' }}>❌ {error}</div>}
-
-        <button type="submit" disabled={loading} className="button-legacy">
-          {loading ? 'Ricerca in corso...' : 'Invia QRCode'}
+        
+        <div style={{ marginTop: '20px', textAlign: 'center' }}>
+          <Turnstile
+            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+            onSuccess={setTurnstileToken}
+          />
+        </div>
+        
+        <button type="submit" disabled={loading || !turnstileToken} className="button-legacy">
+          {loading ? 'Ricerca in corso...' : turnstileToken ? 'Invio in corso...' : 'Invia QRCode'}
         </button>
 
         <button type="button" onClick={() => window.location.href = '/'} className="button-legacy" style={{ backgroundColor: '#6c757d', marginTop: '20px' }}>
