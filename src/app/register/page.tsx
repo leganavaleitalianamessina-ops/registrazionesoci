@@ -150,7 +150,7 @@ export default function RegisterPage() {
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
             <input required type="checkbox" id="gdprConsent" name="gdprConsent" checked={formData.gdprConsent} onChange={handleChange} style={{ transform: 'scale(1.8)', marginRight: '15px' }} />
             <label htmlFor="gdprConsent" style={{ fontSize: '18px' }}>
-              Dichiaro di aver letto l'<a href="https://www.leganavale.it/mod/aalborg_theme/pages/generic.php?filename=InformativaTrattamentoDatiPersonaliRegistrazioneTelematica-Maggio.pdf" target="_blank" style={{ color: '#007bff', textDecoration: 'underline' }}>Informativa Privacy</a> e acconsento al trattamento dei dati personali (Obbligatorio)
+              Dichiaro di aver letto l'<a href="https://www.leganavale.it/mod/aalborg_theme/pages/generic.php?filename=0746730001778785218_InformativaTrattamentoDatiPersonaliRegistrazioneTelematica-Maggio.pdf" target="_blank" style={{ color: '#007bff', textDecoration: 'underline' }}>Informativa Privacy</a> e acconsento al trattamento dei dati personali (Obbligatorio)
             </label>
           </div>
 

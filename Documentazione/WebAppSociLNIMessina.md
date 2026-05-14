@@ -718,7 +718,7 @@ Il sistema registra ogni consenso GDPR per garantire compliance.
 - I dati di logging sono accessibili solo a utenti con ruolo `admin_full`;
 
 **Informativa privacy vigente:**
-https://www.leganavale.it/mod/aalborg_theme/pages/generic.php?filename=InformativaTrattamentoDatiPersonaliRegistrazioneTelematica-Maggio.pdf
+https://www.leganavale.it/mod/aalborg_theme/pages/generic.php?filename=0746730001778785218_InformativaTrattamentoDatiPersonaliRegistrazioneTelematica-Maggio.pdf
 
 ---
 
