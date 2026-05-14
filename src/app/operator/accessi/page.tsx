@@ -48,8 +48,8 @@ export default function OperatorAccessiPage() {
   return (
     <OperatorGuard>
       <div style={{ background: '#003366', color: 'white', padding: '10px 15px', display: 'flex', justifyContent: 'center' }}>
-        <a href="/checkin" style={{ color: 'white', fontSize: '14px', textDecoration: 'none', padding: '6px 16px', background: 'rgba(255,255,255,0.15)', borderRadius: '8px' }}>
-          ← Torna allo Scanner Check-in
+        <a href="/operator" style={{ color: 'white', fontSize: '14px', textDecoration: 'none', padding: '6px 16px', background: 'rgba(255,255,255,0.15)', borderRadius: '8px' }}>
+          ← Home Operatore
         </a>
       </div>
 

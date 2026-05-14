@@ -107,11 +107,16 @@ export default function CheckinPage() {
         width: '100%', minHeight: 'calc(100vh - 50px)', padding: '20px', boxSizing: 'border-box',
         background: '#fff', fontFamily: 'Arial, sans-serif', display: 'flex', flexDirection: 'column'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '15px', borderBottom: '1px solid #eee', marginBottom: '20px' }}>
-          <div style={{ height: '60px', width: 'auto' }}>
-            <img src="/logo.png" alt="LNI Logo" style={{ height: '100%', width: 'auto' }} />
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '15px', borderBottom: '1px solid #eee', marginBottom: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div style={{ height: '60px', width: 'auto' }}>
+              <img src="/logo.png" alt="LNI Logo" style={{ height: '100%', width: 'auto' }} />
+            </div>
+            <h2 style={{ fontSize: '28px', color: '#007bff', marginLeft: '15px', margin: 0 }}>Scanner Check-in</h2>
           </div>
-          <h2 style={{ fontSize: '28px', color: '#007bff', marginLeft: '15px', margin: 0 }}>Scanner Check-in</h2>
+          <a href="/operator" style={{ color: '#007bff', fontSize: '14px', textDecoration: 'none', padding: '6px 16px', background: '#f0f2f5', borderRadius: '8px' }}>
+            Home Operatore
+          </a>
         </div>
 
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
@@ -147,7 +152,7 @@ export default function CheckinPage() {
 
         <footer style={{ marginTop: 'auto', padding: '20px', textAlign: 'center', color: '#888' }}>
           Sistema di Verifica LNI Messina<br />
-          <a href="/operator/accessi" style={{ color: '#007bff', fontSize: '14px', textDecoration: 'none' }}>Registro Accessi Operatori</a>
+          <a href="/operator" style={{ color: '#007bff', fontSize: '14px', textDecoration: 'none' }}>Home Operatore</a>
         </footer>
       </div>
     </OperatorGuard>

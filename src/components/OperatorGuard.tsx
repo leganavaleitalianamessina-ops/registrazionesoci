@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
 interface OperatorGuardProps {
@@ -8,6 +9,7 @@ interface OperatorGuardProps {
 }
 
 export default function OperatorGuard({ children }: OperatorGuardProps) {
+  const router = useRouter();
   const [authenticated, setAuthenticated] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -40,7 +42,7 @@ export default function OperatorGuard({ children }: OperatorGuardProps) {
       setError('Credenziali non valide');
       setLoading(false);
     } else {
-      setAuthenticated(true);
+      router.push('/operator');
     }
   };
 
