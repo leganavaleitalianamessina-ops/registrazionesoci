@@ -15,7 +15,16 @@ function getClientIp(req: NextRequest): string {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { firstName, lastName, email, phone, gdprConsent, marketingConsent } = body;
+    const { firstName, lastName, email, phone, gdprConsent, marketingConsent, website, elapsed } = body;
+
+    // Honeypot: if invisible field is filled, it's a bot
+    if (website) {
+      return NextResponse.json({ error: 'Richiesta non valida.' }, { status: 403 });
+    }
+    // Time-to-submit: must be >= 3 seconds
+    if (typeof elapsed !== 'number' || elapsed < 3000) {
+      return NextResponse.json({ error: 'Richiesta troppo rapida. Ricarica la pagina e riprova.' }, { status: 403 });
+    }
 
     const cleanEmail = email.trim().toLowerCase();
     const cleanFirstName = firstName.trim();

@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { CheckCircle2, Loader2, Mail } from 'lucide-react';
 import Image from 'next/image';
 
 export default function RegisterPage() {
+  const formLoadedAt = useRef(Date.now());
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -14,6 +15,7 @@ export default function RegisterPage() {
     lastName: '',
     email: '',
     phone: '',
+    website: '',
     gdprConsent: false,
     marketingConsent: false,
   });
@@ -46,6 +48,8 @@ export default function RegisterPage() {
           phone: formData.phone.trim(),
           gdprConsent: formData.gdprConsent,
           marketingConsent: formData.marketingConsent,
+          elapsed: Date.now() - formLoadedAt.current,
+          website: formData.website,
         }),
       });
 
@@ -130,6 +134,10 @@ export default function RegisterPage() {
       <p style={{ fontSize: '22px' }}>Compila il modulo per avviare la tua pre-iscrizione alla LNI Messina.</p>
 
       <form onSubmit={handleSubmit} style={{ width: '100%', maxWidth: '600px' }}>
+        <div style={{ position: 'absolute', left: '-9999px' }} aria-hidden="true">
+          <label htmlFor="website">Website</label>
+          <input id="website" name="website" type="text" value={formData.website} onChange={handleChange} tabIndex={-1} autoComplete="off" />
+        </div>
         <label className="label-legacy">Nome *</label>
         <input required name="firstName" value={formData.firstName} onChange={handleChange} className="input-legacy" />
 

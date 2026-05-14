@@ -6,7 +6,16 @@ const privacyUrl = "https://www.leganavale.it/mod/aalborg_theme/pages/generic.ph
 
 export async function POST(req: Request) {
   try {
-    const { email, firstName, lastName, token, type, confirmToken, userId } = await req.json();
+    const { email, firstName, lastName, token, type, confirmToken, userId, website, elapsed } = await req.json();
+
+    // Honeypot check (only if provided, e.g. from recover-qr)
+    if (website !== undefined && website) {
+      return NextResponse.json({ error: 'Richiesta non valida.' }, { status: 403 });
+    }
+    // Time-to-submit check (only if provided)
+    if (elapsed !== undefined && (typeof elapsed !== 'number' || elapsed < 3000)) {
+      return NextResponse.json({ error: 'Richiesta troppo rapida. Ricarica la pagina e riprova.' }, { status: 403 });
+    }
 
     if (!email || !firstName || !lastName) {
       return NextResponse.json({ error: 'Parametri mancanti.' }, { status: 400 });

@@ -1,15 +1,17 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 
 export default function RecoverQRPage() {
+  const formLoadedAt = useRef(Date.now());
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState('');
+  const [website, setWebsite] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,6 +44,8 @@ export default function RecoverQRPage() {
            firstName: data.first_name,
            lastName: data.last_name,
            token: token,
+           elapsed: Date.now() - formLoadedAt.current,
+           website: website,
          }),
        });
 
@@ -88,6 +92,10 @@ export default function RecoverQRPage() {
       <p>Inserisci l'indirizzo email usato durante la registrazione per ricevere nuovamente il tuo codice di accesso.</p>
 
       <form onSubmit={handleSubmit}>
+        <div style={{ position: 'absolute', left: '-9999px' }} aria-hidden="true">
+          <label htmlFor="website">Website</label>
+          <input id="website" name="website" type="text" value={website} onChange={(e) => setWebsite(e.target.value)} tabIndex={-1} autoComplete="off" />
+        </div>
         <label className="label-legacy">Indirizzo Email</label>
         <input
           required
