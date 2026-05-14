@@ -1,6 +1,6 @@
 # LNI MESSINA — WEB APP PRE-ADESIONE E CHECK-IN
 # DOCUMENTO TECNICO ARCHITETTURALE COMPLETO
-## Versione 3.1 — Migrazione da Google Apps Script a GitHub + Supabase
+## Versione 3.2 — Anti-bot, QR activation fix, GDPR update
 
 ---
 
@@ -685,11 +685,16 @@ L'email contiene un pulsante "Conferma Email" e il link testuale.
 Utente clicca il link di conferma.
 
 Sistema:
-- trova `qr_tokens` con `is_active = false` e token corrispondente;
-- imposta `is_active = true` (diventa il QR code ufficiale);
+- trova `qr_tokens` con `is_active = false` e token corrispondente (SELECT);
+- **INSERT** un NUOVO token attivo in `qr_tokens` (l'UPDATE non è permesso dall'anon key via RLS);
+- il vecchio token inattivo rimane come record storico;
 - logga evento `EMAIL_VERIFIED` su `checkin_logs`;
-- mostra il QR code a schermo;
-- invia email con QR code allegato.
+- mostra il nuovo QR code a schermo;
+- invia email con il nuovo QR code allegato.
+
+> **Nota tecnica:** L'UPDATE su `qr_tokens` è bloccato da RLS per l'anon key.  
+> Il flusso usa INSERT di un nuovo token attivo invece di UPDATE.  
+> Schema: `INSERT qr_tokens(user_id, token=NUOVO_TOKEN, is_active=true)`
 
 ---
 
