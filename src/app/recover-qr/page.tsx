@@ -29,7 +29,8 @@ export default function RecoverQRPage() {
         throw new Error("Indirizzo email non trovato o nessun QR code attivo.");
       }
 
-      const token = (data as any).qr_tokens.token;
+      const tokens = (data as any).qr_tokens;
+      const token = Array.isArray(tokens) ? tokens[0]?.token : tokens?.token;
       if (!token) throw new Error("Nessun codice associato a questa email.");
 
       // 2. Chiamata all'API di invio email
