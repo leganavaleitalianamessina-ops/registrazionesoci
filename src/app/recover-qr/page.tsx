@@ -17,18 +17,19 @@ export default function RecoverQRPage() {
     setError(null);
 
     try {
-      // 1. Verifica se l'utente esiste e recupera il token
+      // 1. Verifica se l'utente esiste e recupera il token attivo
       const { data, error: userError } = await supabase
         .from('users')
-        .select('id, first_name, last_name, email, qr_tokens(token)')
+        .select('id, first_name, last_name, email, qr_tokens!inner(token)')
         .eq('email', email)
+        .eq('qr_tokens.is_active', true)
         .single();
 
       if (userError || !data) {
-        throw new Error("Indirizzo email non trovato.");
+        throw new Error("Indirizzo email non trovato o nessun QR code attivo.");
       }
 
-      const token = (data as any).qr_tokens[0]?.token;
+      const token = (data as any).qr_tokens.token;
       if (!token) throw new Error("Nessun codice associato a questa email.");
 
       // 2. Chiamata all'API di invio email

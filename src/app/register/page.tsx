@@ -1,14 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
-import { CheckCircle2, Loader2 } from 'lucide-react';
+import { CheckCircle2, Loader2, Mail } from 'lucide-react';
 import Image from 'next/image';
-import QRCodeDisplay from '@/components/QRCodeDisplay';
 
 export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [generatedToken, setGeneratedToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
@@ -57,9 +55,9 @@ export default function RegisterPage() {
         throw new Error(data.error || 'Errore di comunicazione. Riprova.');
       }
 
-      setGeneratedToken(data.token);
       setSuccess(true);
 
+      // Send confirmation email (silent fail)
       try {
         await fetch('/api/send-qr', {
           method: 'POST',
@@ -68,11 +66,12 @@ export default function RegisterPage() {
             email: formData.email,
             firstName: formData.firstName,
             lastName: formData.lastName,
-            token: data.token,
+            type: 'confirmation',
+            confirmToken: data.confirmToken,
           }),
         });
       } catch (emailErr) {
-        console.error("Errore invio email silente:", emailErr);
+        console.error('Errore invio email conferma:', emailErr);
       }
     } catch (err: any) {
       setError(err.message || 'Errore di comunicazione. Riprova.');
@@ -88,28 +87,33 @@ export default function RegisterPage() {
           <div style={{ height: '80px', width: 'auto' }}>
             <img src="/logo.png" alt="Logo" style={{ height: '100%', width: 'auto' }} />
           </div>
-          <h2>Registrazione Completata!</h2>
+          <h2>Conferma la tua Email</h2>
         </div>
-        <p style={{ fontSize: '22px', textAlign: 'center' }}>Ecco il tuo QRCode ufficiale. Mostralo al check-in.</p>
-        <div style={{ display: 'flex', justifyContent: 'center', margin: '40px 0' }}>
-          {generatedToken && <QRCodeDisplay token={generatedToken} />}
+        <div style={{ textAlign: 'center', padding: '20px' }}>
+          <Mail size={64} style={{ color: '#007bff', marginTop: '20px' }} />
+          <p style={{ fontSize: '22px', marginTop: '30px', lineHeight: '1.6' }}>
+            Ti abbiamo inviato una email di conferma a<br />
+            <strong>{formData.email}</strong>
+          </p>
+          <p style={{ fontSize: '18px', color: '#666', marginTop: '10px', lineHeight: '1.5' }}>
+            Clicca sul link presente nell&apos;email per verificare il tuo indirizzo<br />
+            e ricevere il tuo QRCode personale.
+          </p>
+          <div style={{
+            marginTop: '30px', padding: '20px', background: '#fff3cd', borderRadius: '12px',
+            border: '1px solid #ffc107', display: 'inline-block', textAlign: 'left', maxWidth: '450px'
+          }}>
+            <p style={{ fontSize: '16px', color: '#856404', margin: 0 }}>
+              <strong>📌 Non hai ricevuto l&apos;email?</strong><br />
+              1. Controlla la cartella Spam / Promozioni<br />
+              2. Assicurati di aver inserito l&apos;email corretta<br />
+              3. Se il problema persiste, contatta un amministratore
+            </p>
+          </div>
+          <button onClick={() => window.location.href = '/'} className="button-legacy" style={{ backgroundColor: '#666', marginTop: '30px' }}>
+            Torna alla Home
+          </button>
         </div>
-        <button 
-          onClick={() => {
-            const canvas = document.querySelector('canvas');
-            if (canvas) {
-              const link = document.createElement('a');
-              link.download = `LNI_Messina_QR_${generatedToken}.png`;
-              link.href = canvas.toDataURL('image/png');
-              link.click();
-            }
-          }} 
-          className="button-legacy"
-        >
-          Salva QRCode sul Telefono
-        </button>
-        <button onClick={() => window.print()} className="button-legacy" style={{ backgroundColor: '#6c757d', marginTop: '10px' }}>Stampa / PDF</button>
-        <button onClick={() => window.location.href = '/'} className="button-legacy" style={{ backgroundColor: '#666', marginTop: '10px' }}>Torna alla Home</button>
       </div>
     );
   }
@@ -158,7 +162,7 @@ export default function RegisterPage() {
         {error && <div style={{ color: 'red', fontSize: '24px', textAlign: 'center', margin: '20px 0' }}>❌ {error}</div>}
 
         <button type="submit" disabled={loading} className="button-legacy">
-          {loading ? 'Invio in corso...' : 'Registra e Invia Codice'}
+          {loading ? 'Invio in corso...' : 'Registrati e ricevi email di conferma'}
         </button>
       </form>
     </div>

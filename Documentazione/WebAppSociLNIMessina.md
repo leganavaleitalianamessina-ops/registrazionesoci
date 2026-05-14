@@ -415,6 +415,14 @@ L’interfaccia scanner deve:
 ## Route
 
 ```text
+/login
+```
+
+Login amministratore con email/password Supabase Auth.
+
+---
+
+```text
 /admin
 ```
 
@@ -635,56 +643,86 @@ Il sistema deve consentire:
 
 # 9. REGISTRAZIONE PRE-ADESIONE
 
-# 9.1 FLUSSO
+# 9.1 FLUSSO DOUBLE OPT-IN (GDPR COMPLIANT)
 
-## STEP 1
+## PASSO 1
 
-Utente apre:
+Utente apre `/register` e compila:
+- nome, cognome, email, telefono;
+- consenso GDPR (obbligatorio);
+- consenso marketing (opzionale).
+
+---
+
+## PASSO 2
+
+Sistema:
+- valida dati e controlla duplicati;
+- crea utente;
+- **logga i consensi** su `checkin_logs`:
+  - `checkin_result`: `GDPR_CONSENT` / `MARKETING_CONSENT`;
+  - `device_info`: versione privacy + metodo acquisizione + user agent;
+  - `ip_address`: IP del richiedente;
+- genera **confirmation token** in `qr_tokens` con `is_active = false`;
+- NON genera ancora il QR code definitivo.
+
+---
+
+## PASSO 3
+
+Sistema invia email di **conferma** con link:
 
 ```text
-/register
+/confirm-email?token=CONFIRM_TOKEN
 ```
 
----
-
-## STEP 2
-
-Inserisce:
-- nome;
-- cognome;
-- email;
-- telefono;
-- consenso GDPR;
-- consenso marketing.
+L'email contiene un pulsante "Conferma Email" e il link testuale.
 
 ---
 
-## STEP 3
+## PASSO 4
+
+Utente clicca il link di conferma.
 
 Sistema:
-- valida dati;
-- controlla duplicati;
-- controlla soci attivi.
+- trova `qr_tokens` con `is_active = false` e token corrispondente;
+- imposta `is_active = true` (diventa il QR code ufficiale);
+- logga evento `EMAIL_VERIFIED` su `checkin_logs`;
+- mostra il QR code a schermo;
+- invia email con QR code allegato.
 
 ---
 
-## STEP 4
+## PASSO 5
 
-Sistema:
-- crea utente;
-- genera token QR;
-- genera QRCode PNG.
+Utente salva o stampa il QR code per il check-in in sede.
 
 ---
 
-## STEP 5
+---
 
-Sistema:
-- invia email con QRCode.
+# 9.2 CONSENT LOGGING (GDPR)
+
+Il sistema registra ogni consenso GDPR per garantire compliance.
+
+**Dati registrati per ogni consenso (su `checkin_logs`):**
+- `user_id`: riferimento all'utente;
+- `checkin_result`: tipo di consenso (`GDPR_CONSENT`, `MARKETING_CONSENT`);
+- `device_info`: versione informativa privacy (`v1_2024`) + metodo (`web_form`) + user agent;
+- `ip_address`: indirizzo IP del richiedente;
+- `created_at`: timestamp automatico.
+
+**Flusso:**
+- Al momento della pre-iscrizione, ogni consenso viene registrato come record separato;
+- La registrazione avviene via API route lato server (`/api/register`), che estrae l'IP dalla richiesta;
+- I dati di logging sono accessibili solo a utenti con ruolo `admin_full`;
+
+**Informativa privacy vigente:**
+https://www.leganavale.it/mod/aalborg_theme/pages/generic.php?filename=0240685001765304986_InformativaTrattamentoDatiPersonaliRegistrazioneTelematica.pdf
 
 ---
 
-# 9.2 CONTROLLI DUPLICATI
+# 9.3 CONTROLLI DUPLICATI
 
 Verificare:
 - nome;

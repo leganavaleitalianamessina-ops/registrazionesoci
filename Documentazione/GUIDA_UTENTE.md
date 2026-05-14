@@ -35,6 +35,7 @@ La Web App LNI Messina consente di gestire:
 | Pre-iscrizione | https://registrazionesoci.vercel.app/register | `/qr-register.png` |
 | Scanner Check-in | https://registrazionesoci.vercel.app/checkin | `/qr-checkin.png` |
 | Home operatore | https://registrazionesoci.vercel.app/operator | — |
+| Amministrazione | https://registrazionesoci.vercel.app/login | — |
 | Pagina stampabile pre-iscrizione | https://registrazionesoci.vercel.app/stampa/registrazione | — |
 
 ---
@@ -57,7 +58,14 @@ Modulo per richiedere la pre-adesione alla LNI Messina.
 - Telefono
 - Consenso GDPR
 
-Dopo l'invio, viene generato un QR code personale e inviato all'email indicata.
+**Flusso Double Opt-In (GDPR):**
+1. Compila e invia il modulo
+2. Ricevi una email di conferma all'indirizzo indicato
+3. Clicca sul link **"Conferma Email"** presente nell'email
+4. Dopo la conferma, il tuo QR code personale viene generato e mostrato a schermo
+5. Riceverai anche una email con il QR code allegato
+
+> **Nota bene:** Il QR code viene generato SOLO dopo la conferma dell'email. Questo garantisce che l'indirizzo email sia valido e che nessuno abbia inserito dati altrui.
 
 ### Recupero QR (`/recover-qr`)
 
@@ -128,7 +136,7 @@ Elenco degli accessi registrati con filtro orario.
 
 ## Pagine amministrazione (login email/password)
 
-Accesso tramite `/login` con le credenziali email/password configurate su Supabase Auth.
+Accesso tramite [https://registrazionesoci.vercel.app/login](https://registrazionesoci.vercel.app/login) con le credenziali email/password configurate su Supabase Auth.
 
 ### Dashboard (`/admin`)
 
@@ -177,7 +185,10 @@ I QR code sono disponibili come immagini PNG per essere stampati e affissi in se
 | Web App | https://registrazionesoci.vercel.app |
 | Pre-iscrizione | https://registrazionesoci.vercel.app/register |
 | Scanner Check-in | https://registrazionesoci.vercel.app/checkin |
+| Home operatore | https://registrazionesoci.vercel.app/operator |
 | Registro Accessi | https://registrazionesoci.vercel.app/operator/accessi |
+| Amministrazione | https://registrazionesoci.vercel.app/login |
+| Dashboard admin | https://registrazionesoci.vercel.app/admin |
 | Stampa QR | https://registrazionesoci.vercel.app/stampa/registrazione |
 | Repository GitHub | https://github.com/leganavaleitalianamessina-ops/registrazionesoci |
 

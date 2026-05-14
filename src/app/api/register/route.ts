@@ -6,6 +6,12 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 );
 
+function getClientIp(req: NextRequest): string {
+  const forwarded = req.headers.get('x-forwarded-for');
+  if (forwarded) return forwarded.split(',')[0].trim();
+  return req.headers.get('x-real-ip') || '0.0.0.0';
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -22,11 +28,27 @@ export async function POST(req: NextRequest) {
       .maybeSingle();
 
     if (existingUser) {
-      return NextResponse.json(
-        { error: "Questa email è già registrata. Usa la funzione 'Recupera QRCode' nella Home Page." },
-        { status: 409 }
-      );
+      // Check if user already has an active QR token (already verified)
+      const { data: activeToken } = await supabase
+        .from('qr_tokens')
+        .select('id')
+        .eq('user_id', existingUser.id)
+        .eq('is_active', true)
+        .maybeSingle();
+
+      if (activeToken) {
+        return NextResponse.json(
+          { error: "Questa email è già registrata e verificata. Usa la funzione 'Recupera QRCode' nella Home Page." },
+          { status: 409 }
+        );
+      }
+      // Re-send confirmation for unverified user
+      const confirmToken = Math.random().toString(36).substring(2, 10).toUpperCase();
+      await supabase.from('qr_tokens').insert({ user_id: existingUser.id, token: confirmToken, is_active: false });
+      return NextResponse.json({ userId: existingUser.id, resend: true, email: cleanEmail });
     }
+
+    const ip = getClientIp(req);
 
     const { data: userData, error: userError } = await supabase
       .from('users')
@@ -48,16 +70,36 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Errore durante la registrazione. Riprova.' }, { status: 500 });
     }
 
-    const token = Math.random().toString(36).substring(2, 10).toUpperCase();
-    const { error: tokenError } = await supabase
-      .from('qr_tokens')
-      .insert({ user_id: userData.id, token, is_active: true });
-
-    if (tokenError) {
-      return NextResponse.json({ error: 'Errore durante la generazione del QR code.' }, { status: 500 });
+    // Log GDPR consent (using checkin_logs table for audit trail)
+    const userAgent = req.headers.get('user-agent') || 'unknown';
+    if (gdprConsent) {
+      await supabase.from('checkin_logs').insert({
+        user_id: userData.id,
+        checkin_result: 'GDPR_CONSENT',
+        device_info: `v1_2024|web_form|${userAgent}`,
+        ip_address: ip,
+      });
+    }
+    if (marketingConsent) {
+      await supabase.from('checkin_logs').insert({
+        user_id: userData.id,
+        checkin_result: 'MARKETING_CONSENT',
+        device_info: `v1_2024|web_form|${userAgent}`,
+        ip_address: ip,
+      });
     }
 
-    return NextResponse.json({ userId: userData.id, token, email: cleanEmail });
+    // Create confirmation token in qr_tokens (is_active = false until email verified)
+    const confirmToken = Math.random().toString(36).substring(2, 10).toUpperCase();
+    const { error: tokenError } = await supabase
+      .from('qr_tokens')
+      .insert({ user_id: userData.id, token: confirmToken, is_active: false });
+
+    if (tokenError) {
+      return NextResponse.json({ error: 'Errore durante la generazione del token di conferma.' }, { status: 500 });
+    }
+
+    return NextResponse.json({ userId: userData.id, email: cleanEmail, confirmToken });
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Errore di comunicazione.' }, { status: 500 });
   }
