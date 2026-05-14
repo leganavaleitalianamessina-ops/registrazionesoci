@@ -53,23 +53,28 @@ Pagina principale con collegamenti a:
 Modulo per richiedere la pre-adesione alla LNI Messina.
 
 **Campi richiesti:**
+
 - Nome, Cognome
 - Email
 - Telefono
 - Consenso GDPR
 
 **Flusso Double Opt-In (GDPR):**
-1. Compila e invia il modulo
+1. Compila e invia il modulo (attendere almeno 3 secondi prima di inviare)
 2. Ricevi una email di conferma all'indirizzo indicato
 3. Clicca sul link **"Conferma Email"** presente nell'email
 4. Dopo la conferma, il tuo QR code personale viene generato e mostrato a schermo
 5. Riceverai anche una email con il QR code allegato
 
 > **Nota bene:** Il QR code viene generato SOLO dopo la conferma dell'email. Questo garantisce che l'indirizzo email sia valido e che nessuno abbia inserito dati altrui.
+>
+> **Protezione anti-bot:** Il modulo include un controllo temporale (minimo 3 secondi tra caricamento e invio) e un campo invisibile ai browser. Non sono richieste azioni aggiuntive da parte dell'utente.
 
 ### Recupero QR (`/recover-qr`)
 
 In caso di smarrimento del QR code personale, inserisci la tua email per riceverlo nuovamente.
+
+> **Protezione anti-bot:** Come per la registrazione, è previsto un tempo minimo di 3 secondi tra il caricamento della pagina e l'invio della richiesta.
 
 ### Validazione QR (`/validate/[token]`)
 
@@ -210,6 +215,10 @@ I QR code sono disponibili come immagini PNG per essere stampati e affissi in se
 - Controlla la cartella Spam / Promozioni
 - Verifica che l'email inserita sia corretta
 - Contatta un amministratore per il reinvio manuale
+
+### Il form di registrazione dice "Richiesta troppo rapida"
+- Il sistema richiede almeno 3 secondi tra l'apertura della pagina e l'invio del modulo
+- Ricarica la pagina e riprova, attendendo qualche secondo prima di inviare
 
 ### Problemi di accesso operatore
 - Verifica le credenziali: utente `operatore`, password `verifica1!`

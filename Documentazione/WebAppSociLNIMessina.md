@@ -727,7 +727,39 @@ https://www.leganavale.it/mod/aalborg_theme/pages/generic.php?filename=074673000
 
 ---
 
-# 9.3 CONTROLLI DUPLICATI
+# 9.4 ANTI-BOT MEASURES
+
+Il sistema implementa due livelli di protezione contro attacchi automatici (bot, spam, denial-of-service), sia sul form di registrazione che su quello di recupero QR.
+
+## 9.4.1 Honeypot Invisibile
+
+Un campo input `website` è posizionato fuori schermo tramite CSS (`position: absolute; left: -9999px`) e nascosto agli screen reader (`aria-hidden="true"`).
+
+- Gli utenti umani NON vedono né compilano questo campo
+- I bot tendono a compilare tutti i campi input
+- Il server controlla: `if (website) { return 403 }`
+
+**Implementazione client:** `register/page.tsx`, `recover-qr/page.tsx`
+**Implementazione server:** `api/register/route.ts`, `api/send-qr/route.ts`
+
+## 9.4.2 Time-to-Submit
+
+Al caricamento della pagina, il componente registra `Date.now()` in un `useRef`. Al submit calcola `Date.now() - formLoadedAt` e invia il valore `elapsed` (millisecondi).
+
+Il server verifica:
+- `typeof elapsed === 'number'` (se non inviato -> sospetto)
+- `elapsed >= 3000` (3 secondi minimo per un umano per compilare i campi)
+
+**Implementazione client:** `register/page.tsx`, `recover-qr/page.tsx`
+**Implementazione server:** `api/register/route.ts` (check obbligatorio), `api/send-qr/route.ts` (check condizionale)
+
+## 9.4.3 Flussi esclusi
+
+Le chiamate a `/api/send-qr` provenienti da conferma email (`/confirm-email`) NON inviano `elapsed`/`website` perche' partono da una sessione gia' verificata via email.
+
+---
+
+# 9.5 CONTROLLI DUPLICATI
 
 Verificare:
 - nome;
