@@ -128,7 +128,7 @@ CREATE POLICY "Admin full can manage admin_users" ON admin_users
 -- USERS policies
 -- Anyone can insert (public registration)
 CREATE POLICY "Anyone can register" ON users
-    FOR INSERT WITH CHECK (auth.role() = 'anon' OR get_admin_role() = 'admin_full');
+    FOR INSERT WITH CHECK (true);
 -- Admin full can do everything on users
 CREATE POLICY "Admin full manages users" ON users
     FOR ALL USING (get_admin_role() = 'admin_full');
@@ -137,6 +137,8 @@ CREATE POLICY "Operator can read users" ON users
     FOR SELECT USING (get_admin_role() IN ('checkin_operator', 'admin_monitor', 'admin_full'));
 
 -- QR_TOKENS policies
+CREATE POLICY "Anyone can create tokens" ON qr_tokens
+    FOR INSERT WITH CHECK (true);
 CREATE POLICY "Admin full manages tokens" ON qr_tokens
     FOR ALL USING (get_admin_role() = 'admin_full');
 -- Operator can read tokens for validation

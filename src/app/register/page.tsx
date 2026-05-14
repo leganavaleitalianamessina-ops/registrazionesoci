@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { CheckCircle2, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import QRCodeDisplay from '@/components/QRCodeDisplay';
-import { supabase } from '@/lib/supabase';
 
 export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
@@ -35,53 +34,32 @@ export default function RegisterPage() {
     setError(null);
 
     try {
-      // 0. Normalizzazione dati
       const cleanEmail = formData.email.trim().toLowerCase();
       const cleanFirstName = formData.firstName.trim().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
       const cleanLastName = formData.lastName.trim().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
 
-      // 1. Verifica se l'email esiste già
-      const { data: existingUser } = await supabase
-        .from('users')
-        .select('id')
-        .eq('email', cleanEmail)
-        .maybeSingle();
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firstName: cleanFirstName,
+          lastName: cleanLastName,
+          email: cleanEmail,
+          phone: formData.phone.trim(),
+          gdprConsent: formData.gdprConsent,
+          marketingConsent: formData.marketingConsent,
+        }),
+      });
 
-      if (existingUser) {
-        throw new Error("Questa email è già registrata. Usa la funzione 'Recupera QRCode' nella Home Page.");
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Errore di comunicazione. Riprova.');
       }
 
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .insert([
-          {
-            first_name: cleanFirstName,
-            last_name: cleanLastName,
-            email: cleanEmail,
-            phone: formData.phone.trim(),
-            user_type: 'pre_member',
-            status: 'active',
-            gdpr_consent: formData.gdprConsent,
-            marketing_consent: formData.marketingConsent,
-            expiration_date: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-          },
-        ])
-        .select()
-        .single();
-
-      if (userError) throw userError;
-
-      const token = Math.random().toString(36).substring(2, 10).toUpperCase();
-      const { error: tokenError } = await supabase
-        .from('qr_tokens')
-        .insert([{ user_id: userData.id, token: token, is_active: true }]);
-
-      if (tokenError) throw tokenError;
-
-      setGeneratedToken(token);
+      setGeneratedToken(data.token);
       setSuccess(true);
-      
-      // 3. Invio email automatico
+
       try {
         await fetch('/api/send-qr', {
           method: 'POST',
@@ -90,12 +68,11 @@ export default function RegisterPage() {
             email: formData.email,
             firstName: formData.firstName,
             lastName: formData.lastName,
-            token: token,
+            token: data.token,
           }),
         });
       } catch (emailErr) {
         console.error("Errore invio email silente:", emailErr);
-        // Non blocchiamo la UI se fallisce solo l'email
       }
     } catch (err: any) {
       setError(err.message || 'Errore di comunicazione. Riprova.');
