@@ -1,6 +1,6 @@
 # LNI MESSINA — WEB APP PRE-ADESIONE E CHECK-IN
 # DOCUMENTO TECNICO ARCHITETTURALE COMPLETO
-## Versione 3.0 — Migrazione da Google Apps Script a GitHub + Supabase
+## Versione 3.1 — Migrazione da Google Apps Script a GitHub + Supabase
 
 ---
 
@@ -174,15 +174,22 @@ GitHub
 ## Repository structure
 
 ```text
-/docs
-/src
-/components
-/app
-/lib
-/services
-/supabase
-/public
-/scripts
+Documentazione/          — Documentazione tecnica e guide
+src/
+  app/                   — Route Next.js (App Router)
+    admin/               — Pagine amministrazione
+    api/                 — API route
+    checkin/             — Scanner check-in
+    login/               — Login amministratore
+    operator/            — Pagine operatore
+    stampa/              — Pagine stampabili
+    validate/            — Validazione QR
+    register/            — Pre-iscrizione
+    recover-qr/          — Recupero QR
+  components/            — Componenti riutilizzabili
+  lib/                   — Librerie e utility
+supabase/                — Schema DB e migrazioni
+public/                  — Asset statici (logo, QR code PNG)
 ```
 
 ---
@@ -197,10 +204,10 @@ Utilizzare:
 Vercel Free Plan
 ```
 
-Dominio iniziale:
+Dominio di produzione:
 
 ```text
-nomeprogetto.vercel.app
+https://registrazionesoci.vercel.app
 ```
 
 ---
@@ -243,14 +250,16 @@ Può:
 ## CHECKIN_OPERATOR
 
 Può:
-- usare scanner QR;
-- verificare accessi;
-- registrare check-in.
+- accedere al registro accessi (login operatore);
+- consultare esiti check-in con filtro orario.
 
 NON può:
 - modificare utenti;
 - vedere dati completi;
 - esportare dati.
+
+Nota: lo scanner QR in `/checkin` è pubblico e non richiede login.
+L'autenticazione operatore è necessaria solo per il registro accessi (`/operator/accessi`).
 
 ---
 
@@ -313,7 +322,69 @@ Recupero QRCode.
 
 ---
 
-# 6.2 MODALITÀ CHECK-IN
+```text
+/checkin
+```
+
+Scanner QR code per check-in. Accessibile a tutti, nessun login richiesto.
+
+---
+
+```text
+/validate/[token]
+```
+
+Validazione QR code personale.
+
+---
+
+```text
+/stampa/registrazione
+```
+
+Pagina ottimizzata per stampa con QR code pre-iscrizione.
+
+---
+
+# 6.2 MODALITÀ OPERATORE
+
+## Route
+
+```text
+/operator
+```
+
+Home operatore (richiede login). Hub con pulsanti per scanner check-in e registro accessi.
+
+Credenziali: utente `operatore`, password `verifica1!`.
+
+---
+
+```text
+/operator/accessi
+```
+
+Registro accessi con filtro 24h/12h/6h/4h (richiede login). Mostra esiti check-in con badge colore.
+
+---
+
+```text
+/operator/checkins
+```
+
+(Alternativa) Monitoraggio check-in via API route con Bearer token.
+
+---
+
+## Login operatore
+
+L'autenticazione operatore usa Supabase Auth con email `operatore@leganavale.it`.
+La UI presenta un form semplificato (solo utente/password, senza mostrare l'email).
+Il componente `OperatorGuard.tsx` gestisce login/logout e verifica sessione esistente all'avvio.
+
+---
+
+# 6.3 MODALITÀ CHECK-IN (SCANNER)
 
 ## Route
 
@@ -321,7 +392,7 @@ Recupero QRCode.
 /checkin
 ```
 
-Interfaccia fullscreen scanner.
+Interfaccia fullscreen scanner (pubblica, nessun login).
 
 ---
 
@@ -339,7 +410,7 @@ L’interfaccia scanner deve:
 
 ---
 
-# 6.3 MODALITÀ ADMIN
+# 6.4 MODALITÀ ADMIN
 
 ## Route
 
@@ -538,7 +609,7 @@ https://app-domain/validate/TOKEN
 Esempio:
 
 ```text
-https://lnimessina-checkin.vercel.app/validate/8f2d91fa
+https://registrazionesoci.vercel.app/validate/8f2d91fa
 ```
 
 ---
