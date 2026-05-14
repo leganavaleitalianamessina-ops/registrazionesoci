@@ -8,6 +8,7 @@ import OperatorGuard from '@/components/OperatorGuard';
 export default function CheckinPage() {
   const [scanResult, setScanResult] = useState<any>(null);
   const [isScanning, setIsScanning] = useState(true);
+  const [scannerError, setScannerError] = useState<string | null>(null);
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
 
   const playSound = (success: boolean) => {
@@ -38,56 +39,61 @@ export default function CheckinPage() {
     );
     scannerRef.current = scanner;
 
-    scanner.render(async (decodedText) => {
-      setIsScanning(false);
-      try {
-        const parts = decodedText.split('/');
-        const token = parts[parts.length - 1].trim().toUpperCase();
+    try {
+      scanner.render(async (decodedText) => {
+        setIsScanning(false);
+        try {
+          const parts = decodedText.split('/');
+          const token = parts[parts.length - 1].trim().toUpperCase();
 
-        const { data, error } = await supabase
-          .from('qr_tokens')
-          .select('*, users(*)')
-          .eq('token', token)
-          .single();
+          const { data, error } = await supabase
+            .from('qr_tokens')
+            .select('*, users(*)')
+            .eq('token', token)
+            .single();
 
-        const deviceInfo = navigator.userAgent || 'unknown';
+          const deviceInfo = navigator.userAgent || 'unknown';
 
-        const logCheckin = async (userId: string | null, result: string) => {
-          await supabase.from('checkin_logs').insert({
-            user_id: userId,
-            checkin_result: result,
-            device_info: deviceInfo,
-          });
-        };
-
-        if (error || !data) {
-          playSound(false);
-          setScanResult({ success: false, message: "NON VALIDO", sub: "Codice non trovato" });
-          await logCheckin(null, 'NOT_FOUND');
-        } else {
-          const user = data.users;
-          const isExpired = new Date(user.expiration_date) < new Date();
-
-          if (isExpired) {
-            playSound(false);
-            setScanResult({ success: false, message: "SCADUTO", sub: `Valido fino al ${new Date(user.expiration_date).toLocaleDateString()}` });
-            await logCheckin(user.id, 'EXPIRED');
-          } else {
-            playSound(true);
-            setScanResult({
-              success: true,
-              message: "VALIDO",
-              name: `${user.first_name} ${user.last_name}`,
-              type: user.user_type === 'pre_member' ? 'Pre-Iscrizione' : 'Socio'
+          const logCheckin = async (userId: string | null, result: string) => {
+            await supabase.from('checkin_logs').insert({
+              user_id: userId,
+              checkin_result: result,
+              device_info: deviceInfo,
             });
-            await logCheckin(user.id, 'SUCCESS');
+          };
+
+          if (error || !data) {
+            playSound(false);
+            setScanResult({ success: false, message: "NON VALIDO", sub: "Codice non trovato" });
+            await logCheckin(null, 'NOT_FOUND');
+          } else {
+            const user = data.users;
+            const isExpired = new Date(user.expiration_date) < new Date();
+
+            if (isExpired) {
+              playSound(false);
+              setScanResult({ success: false, message: "SCADUTO", sub: `Valido fino al ${new Date(user.expiration_date).toLocaleDateString()}` });
+              await logCheckin(user.id, 'EXPIRED');
+            } else {
+              playSound(true);
+              setScanResult({
+                success: true,
+                message: "VALIDO",
+                name: `${user.first_name} ${user.last_name}`,
+                type: user.user_type === 'pre_member' ? 'Pre-Iscrizione' : 'Socio'
+              });
+              await logCheckin(user.id, 'SUCCESS');
+            }
           }
+        } catch (e: any) {
+          playSound(false);
+          setScanResult({ success: false, message: "ERRORE", sub: "Riprova tra un istante" });
         }
-      } catch (e: any) {
-        playSound(false);
-        setScanResult({ success: false, message: "ERRORE", sub: "Riprova tra un istante" });
-      }
-    }, () => {});
+      }, () => {});
+    } catch (e) {
+      setScannerError("Impossibile accedere alla fotocamera. Autorizza l'accesso e riprova.");
+      setIsScanning(false);
+    }
 
     return () => {
       if (scannerRef.current) {
@@ -120,7 +126,16 @@ export default function CheckinPage() {
         </div>
 
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          {isScanning ? (
+          {scannerError ? (
+            <div style={{ padding: '40px 20px', borderRadius: '20px', backgroundColor: '#fff3cd', color: '#856404', textAlign: 'center', border: '2px solid #ffc107' }}>
+              <p style={{ fontSize: '22px', fontWeight: 'bold', margin: 0 }}>Errore Fotocamera</p>
+              <p style={{ fontSize: '16px', marginTop: '10px' }}>{scannerError}</p>
+              <button onClick={() => { setScannerError(null); setIsScanning(true); }}
+                style={{ padding: '14px 30px', marginTop: '20px', background: '#ffc107', color: '#856404', border: 'none', borderRadius: '10px', fontSize: '18px', fontWeight: 'bold', cursor: 'pointer' }}>
+                Riprova
+              </button>
+            </div>
+          ) : isScanning ? (
             <div>
               <div id="reader" style={{ width: '100%', borderRadius: '20px', overflow: 'hidden', border: '4px solid #007bff', backgroundColor: '#f8f9fa' }}></div>
               <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '20px', color: '#666' }}>Inquadra il QRCode del socio</p>
