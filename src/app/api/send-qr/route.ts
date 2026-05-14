@@ -2,7 +2,7 @@ import nodemailer from 'nodemailer';
 import { NextResponse } from 'next/server';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://registrazionesoci.vercel.app';
-const privacyUrl = "https://www.leganavale.it/mod/aalborg_theme/pages/generic.php?filename=0240685001765304986_InformativaTrattamentoDatiPersonaliRegistrazioneTelematica.pdf";
+const privacyUrl = "https://www.leganavale.it/mod/aalborg_theme/pages/generic.php?filename=InformativaTrattamentoDatiPersonaliRegistrazioneTelematica-Maggio.pdf";
 
 export async function POST(req: Request) {
   try {

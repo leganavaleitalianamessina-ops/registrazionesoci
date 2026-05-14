@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase';
 export default function AdminDashboard() {
   const router = useRouter();
   const [adminRole, setAdminRole] = useState<string | null>(null);
-  const [stats, setStats] = useState({ users: 0, activeQr: 0, todayCheckins: 0 });
+  const [stats, setStats] = useState({ users: 0, activeMembers: 0, preMembers: 0, activeQr: 0, todayCheckins: 0 });
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -27,6 +27,8 @@ export default function AdminDashboard() {
 
       const today = new Date().toISOString().split('T')[0]
       const { count: u } = await supabase.from('users').select('*', { count: 'exact', head: true })
+      const { count: am } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('user_type', 'active_member')
+      const { count: pm } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('user_type', 'pre_member')
       const { count: q } = await supabase.from('qr_tokens').select('*', { count: 'exact', head: true }).eq('is_active', true)
       const { count: c } = await supabase
         .from('checkin_logs')
@@ -34,7 +36,7 @@ export default function AdminDashboard() {
         .gte('created_at', `${today}T00:00:00.000Z`)
         .lte('created_at', `${today}T23:59:59.999Z`)
 
-      setStats({ users: u || 0, activeQr: q || 0, todayCheckins: c || 0 })
+      setStats({ users: u || 0, activeMembers: am || 0, preMembers: pm || 0, activeQr: q || 0, todayCheckins: c || 0 })
       setReady(true)
     })()
   }, [])
@@ -52,8 +54,10 @@ export default function AdminDashboard() {
       <div style={{ padding: '20px', maxWidth: '1000px', margin: '0 auto' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '30px' }}>
           <Card value={stats.users} label="Utenti Totali" color="#007bff" />
-          <Card value={stats.activeQr} label="QR Attivi" color="#28a745" />
-          <Card value={stats.todayCheckins} label="Check-in Oggi" color="#ffc107" />
+          <Card value={stats.activeMembers} label="Soci Attivi" color="#28a745" />
+          <Card value={stats.preMembers} label="Aspiranti Soci" color="#ffc107" />
+          <Card value={stats.activeQr} label="QR Attivi" color="#6f42c1" />
+          <Card value={stats.todayCheckins} label="Check-in Oggi" color="#dc3545" />
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <NavButton label="Gestione Utenti" desc="Aggiungi, modifica o elimina soci e pre-aderenti" onClick={() => router.push('/admin/users')} color="#007bff" />

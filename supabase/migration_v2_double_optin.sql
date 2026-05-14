@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS consent_logs (
     ip_address TEXT,
     user_agent TEXT,
     privacy_version TEXT DEFAULT 'v1_2024',
-    privacy_url TEXT NOT NULL DEFAULT 'https://www.leganavale.it/mod/aalborg_theme/pages/generic.php?filename=0240685001765304986_InformativaTrattamentoDatiPersonaliRegistrazioneTelematica.pdf',
+    privacy_url TEXT NOT NULL DEFAULT 'https://www.leganavale.it/mod/aalborg_theme/pages/generic.php?filename=InformativaTrattamentoDatiPersonaliRegistrazioneTelematica-Maggio.pdf',
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
