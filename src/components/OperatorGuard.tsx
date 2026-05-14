@@ -40,7 +40,7 @@ export default function OperatorGuard({ children }: OperatorGuardProps) {
       setError('Credenziali non valide');
       setLoading(false);
     } else {
-      window.location.href = '/operator';
+      setAuthenticated(true);
     }
   };
 

@@ -3,7 +3,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 import { supabase } from '@/lib/supabase';
-import OperatorGuard from '@/components/OperatorGuard';
 
 export default function CheckinPage() {
   const [scanResult, setScanResult] = useState<any>(null);
@@ -108,7 +107,6 @@ export default function CheckinPage() {
   };
 
   return (
-    <OperatorGuard>
       <div style={{
         width: '100%', minHeight: 'calc(100vh - 50px)', padding: '20px', boxSizing: 'border-box',
         background: '#fff', fontFamily: 'Arial, sans-serif', display: 'flex', flexDirection: 'column'
@@ -170,6 +168,5 @@ export default function CheckinPage() {
           <a href="/operator" style={{ color: '#007bff', fontSize: '14px', textDecoration: 'none' }}>Home Operatore</a>
         </footer>
       </div>
-    </OperatorGuard>
   );
 }
