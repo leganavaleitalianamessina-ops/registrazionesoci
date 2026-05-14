@@ -111,7 +111,7 @@ export default function RecoverQRPage() {
         </div>
         
         <button type="submit" disabled={loading || !turnstileToken} className="button-legacy">
-          {loading ? 'Ricerca in corso...' : turnstileToken ? 'Invio in corso...' : 'Invia QRCode'}
+          {loading ? 'Ricerca in corso...' : 'Invia QRCode'}
         </button>
 
         <button type="button" onClick={() => window.location.href = '/'} className="button-legacy" style={{ backgroundColor: '#6c757d', marginTop: '20px' }}>

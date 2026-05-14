@@ -48,6 +48,7 @@ export default function RegisterPage() {
           phone: formData.phone.trim(),
           gdprConsent: formData.gdprConsent,
           marketingConsent: formData.marketingConsent,
+          turnstileToken: turnstileToken,
         }),
       });
 
@@ -61,17 +62,16 @@ export default function RegisterPage() {
 
       // Send confirmation email (silent fail)
       try {
-        const res = await fetch('/api/register', {
+        await fetch('/api/send-qr', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            firstName: cleanFirstName,
-            lastName: cleanLastName,
-            email: cleanEmail,
-            phone: formData.phone.trim(),
-            gdprConsent: formData.gdprConsent,
-            marketingConsent: formData.marketingConsent,
-            turnstileToken: turnstileToken,
+            userId: data.userId,
+            email: formData.email,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            type: 'confirmation',
+            confirmToken: data.confirmToken,
           }),
         });
       } catch (emailErr) {
@@ -173,7 +173,7 @@ export default function RegisterPage() {
         </div>
         
         <button type="submit" disabled={loading || !turnstileToken} className="button-legacy">
-          {loading ? 'Invio in corso...' : turnstileToken ? 'Invio in corso...' : 'Registrati e ricevi email di conferma'}
+          {loading ? 'Invio in corso...' : 'Registrati e ricevi email di conferma'}
         </button>
       </form>
     </div>
