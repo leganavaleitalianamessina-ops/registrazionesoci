@@ -6,7 +6,7 @@ const privacyUrl = "https://www.leganavale.it/mod/aalborg_theme/pages/generic.ph
 
 export async function POST(req: Request) {
   try {
-    const { email, firstName, lastName, token, type, confirmToken } = await req.json();
+    const { email, firstName, lastName, token, type, confirmToken, userId } = await req.json();
 
     if (!email || !firstName || !lastName) {
       return NextResponse.json({ error: 'Parametri mancanti.' }, { status: 400 });
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Token di conferma mancante.' }, { status: 400 });
       }
 
-      const confirmUrl = `${APP_URL}/confirm-email?token=${confirmToken}`;
+      const confirmUrl = `${APP_URL}/confirm-email?token=${confirmToken}${userId ? `&uid=${userId}` : ''}`;
 
       const mailOptions = {
         from: `"LNI Messina" <${process.env.EMAIL_USER}>`,

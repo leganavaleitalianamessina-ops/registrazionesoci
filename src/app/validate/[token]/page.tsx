@@ -21,6 +21,7 @@ export default function ValidatePage() {
           .from('qr_tokens')
           .select('*, users(*)')
           .eq('token', token)
+          .eq('is_active', true)
           .single();
 
         if (fetchError || !data) {

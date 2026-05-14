@@ -46,5 +46,12 @@ CREATE POLICY "Admin full can read consent" ON consent_logs
 CREATE INDEX IF NOT EXISTS idx_consent_logs_user_id ON consent_logs(user_id);
 CREATE INDEX IF NOT EXISTS idx_users_confirmation_token ON users(confirmation_token);
 
--- 6. Comments
+-- 6. Fix RLS for qr_tokens: allow anon to activate confirmation tokens
+-- (The /api/confirm-email route now uses INSERT for new active tokens as primary fix,
+--  this UPDATE policy is additional safety for future use)
+DROP POLICY IF EXISTS "Anyone can activate confirmation token" ON qr_tokens;
+CREATE POLICY "Anyone can activate confirmation token" ON qr_tokens
+    FOR UPDATE USING (is_active = false) WITH CHECK (is_active = true);
+
+-- 7. Comments
 COMMENT ON TABLE consent_logs IS 'GDPR consent logging: stores timestamp, IP, and privacy version for each consent';

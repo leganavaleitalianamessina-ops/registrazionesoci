@@ -8,18 +8,24 @@ const supabase = createClient(
 
 export async function POST(req: NextRequest) {
   try {
-    const { token } = await req.json();
+    const { token, userId } = await req.json();
 
     if (!token) {
       return NextResponse.json({ error: 'Token mancante.' }, { status: 400 });
     }
+    if (!userId) {
+      return NextResponse.json({ error: 'ID utente mancante.' }, { status: 400 });
+    }
 
-    // Find the confirmation token (is_active = false) and get user name
+    const tokenUpper = token.toUpperCase();
+
+    // Verify the confirmation token exists and belongs to this userId
     const { data: qrToken, error: findError } = await supabase
       .from('qr_tokens')
-      .select('id, user_id, users(first_name, last_name, email)')
-      .eq('token', token.toUpperCase())
+      .select('id, user_id')
+      .eq('token', tokenUpper)
       .eq('is_active', false)
+      .eq('user_id', userId)
       .single();
 
     if (findError || !qrToken) {
@@ -29,29 +35,36 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const user = qrToken.users as any;
+    // Generate a new unique token for the active QR code
+    const qrTokenValue = Math.random().toString(36).substring(2, 10).toUpperCase();
 
-    // Activate the token (now it's the user's official QR code)
-    const { error: updateError } = await supabase
+    // Insert a new active QR token (INSERT works for anon, UPDATE doesn't)
+    const { error: insertError } = await supabase
       .from('qr_tokens')
-      .update({ is_active: true })
-      .eq('id', qrToken.id);
+      .insert({ user_id: userId, token: qrTokenValue, is_active: true });
 
-    if (updateError) {
-      return NextResponse.json({ error: 'Errore durante la verifica.' }, { status: 500 });
+    if (insertError) {
+      return NextResponse.json({ error: 'Errore durante la generazione del QR code.' }, { status: 500 });
     }
 
     // Log the verification event
     await supabase.from('checkin_logs').insert({
-      user_id: qrToken.user_id,
+      user_id: userId,
       checkin_result: 'EMAIL_VERIFIED',
       device_info: 'double_optin|email_confirmation',
     });
 
+    // Fetch user details for the response
+    const { data: user } = await supabase
+      .from('users')
+      .select('first_name, last_name, email')
+      .eq('id', userId)
+      .single();
+
     return NextResponse.json({
       success: true,
-      userId: qrToken.user_id,
-      token: token.toUpperCase(),
+      userId,
+      token: qrTokenValue,
       firstName: user?.first_name || '',
       lastName: user?.last_name || '',
       email: user?.email || '',

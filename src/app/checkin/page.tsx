@@ -49,6 +49,7 @@ export default function CheckinPage() {
             .from('qr_tokens')
             .select('*, users(*)')
             .eq('token', token)
+            .eq('is_active', true)
             .single();
 
           const deviceInfo = navigator.userAgent || 'unknown';

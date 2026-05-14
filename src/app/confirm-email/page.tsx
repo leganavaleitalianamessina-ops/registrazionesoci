@@ -7,6 +7,7 @@ import QRCodeDisplay from '@/components/QRCodeDisplay';
 function ConfirmContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
+  const userId = searchParams.get('uid');
 
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [qrToken, setQrToken] = useState<string | null>(null);
@@ -18,13 +19,18 @@ function ConfirmContent() {
       setMessage('Link non valido: token mancante.');
       return;
     }
+    if (!userId) {
+      setStatus('error');
+      setMessage('Link non valido: parametro utente mancante. Richiedi una nuova registrazione.');
+      return;
+    }
 
     (async () => {
       try {
         const res = await fetch('/api/confirm-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token }),
+          body: JSON.stringify({ token, userId }),
         });
         const data = await res.json();
 
@@ -55,7 +61,7 @@ function ConfirmContent() {
         setMessage('Errore di comunicazione. Riprova.');
       }
     })();
-  }, [token]);
+  }, [token, userId]);
 
   return (
     <div className="container-legacy">

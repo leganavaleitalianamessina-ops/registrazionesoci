@@ -139,6 +139,9 @@ CREATE POLICY "Operator can read users" ON users
 -- QR_TOKENS policies
 CREATE POLICY "Anyone can create tokens" ON qr_tokens
     FOR INSERT WITH CHECK (true);
+-- Anyone can activate a confirmation token (is_active=false → true)
+CREATE POLICY "Anyone can activate confirmation token" ON qr_tokens
+    FOR UPDATE USING (is_active = false) WITH CHECK (is_active = true);
 CREATE POLICY "Admin full manages tokens" ON qr_tokens
     FOR ALL USING (get_admin_role() = 'admin_full');
 -- Operator can read tokens for validation

@@ -42,10 +42,22 @@ export async function POST(req: NextRequest) {
           { status: 409 }
         );
       }
-      // Re-send confirmation for unverified user
-      const confirmToken = Math.random().toString(36).substring(2, 10).toUpperCase();
-      await supabase.from('qr_tokens').insert({ user_id: existingUser.id, token: confirmToken, is_active: false });
-      return NextResponse.json({ userId: existingUser.id, resend: true, email: cleanEmail });
+      // Reuse existing inactive token or create a new one
+      let confirmToken: string;
+      const { data: existingInactive } = await supabase
+        .from('qr_tokens')
+        .select('token')
+        .eq('user_id', existingUser.id)
+        .eq('is_active', false)
+        .maybeSingle();
+
+      if (existingInactive) {
+        confirmToken = existingInactive.token;
+      } else {
+        confirmToken = Math.random().toString(36).substring(2, 10).toUpperCase();
+        await supabase.from('qr_tokens').insert({ user_id: existingUser.id, token: confirmToken, is_active: false });
+      }
+      return NextResponse.json({ userId: existingUser.id, resend: true, email: cleanEmail, confirmToken });
     }
 
     const ip = getClientIp(req);
