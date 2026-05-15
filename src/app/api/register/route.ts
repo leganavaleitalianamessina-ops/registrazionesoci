@@ -30,33 +30,18 @@ export async function POST(req: NextRequest) {
     const cleanLastName = lastName.trim();
     const cleanPhone = phone.trim();
 
-    // Check duplicate phone
+    // Check duplicate phone — always block re-registration
     const { data: existingUser } = await supabase
       .from('users')
-      .select('id, first_name, last_name')
+      .select('id')
       .eq('phone', cleanPhone)
       .maybeSingle();
 
     if (existingUser) {
-      const { data: activeToken } = await supabase
-        .from('qr_tokens')
-        .select('token')
-        .eq('user_id', existingUser.id)
-        .eq('is_active', true)
-        .maybeSingle();
-
-      if (activeToken) {
-        return NextResponse.json(
-          { error: "Questo numero di telefono è già registrato. Usa 'Recupera QRCode' nella Home Page." },
-          { status: 409 }
-        );
-      }
-      const token = Math.random().toString(36).substring(2, 10).toUpperCase();
-      await supabase.from('qr_tokens').insert({ user_id: existingUser.id, token, is_active: true });
-      return NextResponse.json({
-        userId: existingUser.id, token, phone: cleanPhone,
-        firstName: existingUser.first_name, lastName: existingUser.last_name,
-      });
+      return NextResponse.json(
+        { error: "Questo numero di telefono è già registrato. Usa 'Recupera QRCode' nella Home Page." },
+        { status: 409 }
+      );
     }
 
     const ip = getClientIp(req);
