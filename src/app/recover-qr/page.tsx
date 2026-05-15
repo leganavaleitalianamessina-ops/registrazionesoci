@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useRef, useState } from 'react';
-import { Loader2, ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
+import QRCodeDisplay from '@/components/QRCodeDisplay';
 
 export default function RecoverQRPage() {
   const formLoadedAt = useRef(Date.now());
@@ -12,14 +12,19 @@ export default function RecoverQRPage() {
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState('');
   const [website, setWebsite] = useState('');
+  const [qrToken, setQrToken] = useState<string | null>(null);
+  const [qrFirstName, setQrFirstName] = useState('');
+  const [qrLastName, setQrLastName] = useState('');
+  const [emailSent, setEmailSent] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setQrToken(null);
+    setEmailSent(false);
 
     try {
-      // 1. Verifica se l'utente esiste e recupera il token attivo
       const { data, error: userError } = await supabase
         .from('users')
         .select('id, first_name, last_name, email, qr_tokens!inner(token)')
@@ -35,21 +40,24 @@ export default function RecoverQRPage() {
       const token = Array.isArray(tokens) ? tokens[0]?.token : tokens?.token;
       if (!token) throw new Error("Nessun codice associato a questa email.");
 
-      // 2. Chiamata all'API di invio email
-       const response = await fetch('/api/send-qr', {
-         method: 'POST',
-         headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify({
-           email: data.email,
-           firstName: data.first_name,
-           lastName: data.last_name,
-           token: token,
-           elapsed: Date.now() - formLoadedAt.current,
-           website: website,
-         }),
-       });
+      // Show QR immediately
+      setQrToken(token);
+      setQrFirstName(data.first_name);
+      setQrLastName(data.last_name);
 
-      if (!response.ok) throw new Error("Errore nell'invio dell'email.");
+      // Send email asynchronously (silent fail)
+      fetch('/api/send-qr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: data.email,
+          firstName: data.first_name,
+          lastName: data.last_name,
+          token,
+          elapsed: Date.now() - formLoadedAt.current,
+          website,
+        }),
+      }).then(r => { if (r.ok) setEmailSent(true); }).catch(() => {});
 
       setSuccess(true);
     } catch (err: any) {
@@ -59,19 +67,48 @@ export default function RecoverQRPage() {
     }
   };
 
-  if (success) {
+  if (success && qrToken) {
     return (
       <div className="container-legacy">
         <div className="header-logo-legacy">
-          <Image src="/logo.png" alt="Logo" width={80} height={80} />
-          <h2>Recupero Inviato</h2>
+          <div style={{ height: '80px', width: 'auto' }}>
+            <img src="/logo.png" alt="Logo LNI" style={{ height: '100%', width: 'auto', display: 'block' }} />
+          </div>
+          <h2>QR Code Recuperato</h2>
         </div>
-        <p style={{ fontSize: '24px', textAlign: 'center', marginTop: '40px' }}>
-          Se l'indirizzo <strong>{email}</strong> è registrato, riceverai a breve un'email con il tuo QRCode.
-        </p>
-        <button onClick={() => window.location.href = '/'} className="button-legacy" style={{ marginTop: '60px' }}>
-          Torna alla Home
-        </button>
+        <div style={{ textAlign: 'center', padding: '20px', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <h3 style={{ fontSize: '28px', color: '#333', marginBottom: '20px' }}>
+            {qrFirstName} {qrLastName}
+          </h3>
+          <div style={{
+            padding: '20px', backgroundColor: 'white', borderRadius: '20px',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.1)', display: 'inline-block'
+          }}>
+            <QRCodeDisplay token={qrToken} size={260} />
+          </div>
+          <p style={{ fontSize: '18px', color: '#666', marginTop: '20px', lineHeight: '1.5' }}>
+            Il tuo codice personale:<br />
+            <strong style={{ fontSize: '28px', color: '#003366', letterSpacing: '3px' }}>{qrToken}</strong>
+          </p>
+          <p style={{ fontSize: '18px', color: '#666', marginTop: '20px' }}>
+            {emailSent
+              ? <>Email inviata a <strong>{email}</strong></>
+              : <>La email potrebbe essere in arrivo (controlla anche lo spam)</>}
+          </p>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '30px', flexWrap: 'wrap' }}>
+            <button onClick={() => window.open(`/validate/${qrToken}`, '_blank')} className="button-legacy" style={{ padding: '20px 30px', fontSize: '24px' }}>
+              Visualizza QR Code
+            </button>
+            <button onClick={() => window.location.href = '/'} className="button-legacy" style={{ backgroundColor: '#6c757d', padding: '20px 30px', fontSize: '24px' }}>
+              Torna alla Home
+            </button>
+          </div>
+          {!emailSent && (
+            <p style={{ fontSize: '14px', color: '#888', marginTop: '20px' }}>
+              Puoi salvare il QR code premendo "Visualizza QR Code" e poi "Salva sul telefono".
+            </p>
+          )}
+        </div>
       </div>
     );
   }
