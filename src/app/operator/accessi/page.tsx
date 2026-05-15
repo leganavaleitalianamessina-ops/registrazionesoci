@@ -25,6 +25,7 @@ export default function OperatorAccessiPage() {
     const { data, error: fetchError } = await supabase
       .from('checkin_logs')
       .select('*, users(first_name, last_name)')
+      .in('checkin_result', ['SUCCESS', 'EXPIRED', 'REVOKED', 'NOT_FOUND'])
       .gte('created_at', fromDate)
       .order('created_at', { ascending: false });
     if (fetchError) {

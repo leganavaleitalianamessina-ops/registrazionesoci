@@ -48,6 +48,7 @@ export async function GET(req: Request) {
   const { data: logs, error } = await supabase
     .from('checkin_logs')
     .select('*, users(first_name, last_name, email)')
+    .in('checkin_result', ['SUCCESS', 'EXPIRED', 'REVOKED', 'NOT_FOUND'])
     .gte('created_at', fromDate)
     .lte('created_at', toDate)
     .order('created_at', { ascending: false })

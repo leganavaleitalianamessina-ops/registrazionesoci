@@ -41,6 +41,7 @@ export default function AdminDashboard() {
       const { count: c } = await supabase
         .from('checkin_logs')
         .select('*', { count: 'exact', head: true })
+        .in('checkin_result', ['SUCCESS', 'EXPIRED', 'REVOKED', 'NOT_FOUND'])
         .gte('created_at', `${today}T00:00:00.000Z`)
         .lte('created_at', `${today}T23:59:59.999Z`)
 
