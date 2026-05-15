@@ -154,7 +154,11 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        {error && <div style={{ color: 'red', fontSize: '24px', textAlign: 'center', margin: '20px 0' }}>❌ {error}</div>}
+        {error && <div style={{ color: 'red', fontSize: '24px', textAlign: 'center', margin: '20px 0' }}>
+          ❌ {error.includes('Home Page')
+            ? <>Questo numero di telefono è già registrato. Usa 'Recupera QRCode' nella <a href="/" style={{ color: 'red', textDecoration: 'underline' }}>Home Page</a>.</>
+            : error}
+        </div>}
 
         <button type="submit" disabled={loading} className="button-legacy">
           {loading ? 'Invio in corso...' : 'Registrati e ricevi il tuo QR Code'}
