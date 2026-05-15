@@ -106,6 +106,10 @@ export default function AdminDashboard() {
             </div>
           </div>
         )}
+        <footer style={{ marginTop: '40px', padding: '20px', textAlign: 'center', fontSize: '12px', color: '#999', borderTop: '1px solid #ddd' }}>
+          &copy; {new Date().getFullYear()} Lega Navale Italiana - Sezione di Messina<br />
+          <a href="/LICENSE.txt" style={{ color: '#666', textDecoration: 'underline' }}>Licenza d'Uso</a>
+        </footer>
       </div>
     </div>
   )

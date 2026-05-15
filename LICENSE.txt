@@ -1,0 +1,32 @@
+LEGA NAVALE ITALIANA
+Sezione di Messina
+Via Consolare Pompea, 244 - Riviera Pace, 98167 Messina
+
+LICENZA D'USO E CONDIZIONI DI UTILIZZO DELL'APPLICATIVO
+
+1. Proprietà Intellettuale
+L'applicativo software per la gestione delle pre-adesioni e del check-in telematico è di esclusiva
+proprietà della Lega Navale Italiana - Sezione di Messina (di seguito denominata "Sezione").
+Tutti i diritti relativi al codice sorgente, all'architettura dei dati e alle interfacce sono riservati.
+
+2. Concessione in Comodato d'Uso
+La Sezione concede il presente applicativo in comodato d'uso gratuito alle terze parti incaricate
+della gestione dei servizi socio-ricreativi per i soci. Tale concessione è finalizzata esclusivamente
+all'espletamento delle attività di verifica degli accessi e gestione delle procedure di pre-adesione
+concordate con la Sezione.
+
+3. Esclusione di Responsabilità
+La Sezione non potrà essere ritenuta responsabile per malfunzionamenti temporanei, bug
+software, interruzioni di servizio o disservizi non prevedibili derivanti dall'uso dell'applicativo. In
+particolare, la Sezione non risponderà di:
+- Eventuali danni diretti o indiretti derivanti dall'impossibilità di utilizzare il sistema;
+- Problemi organizzativi o ritardi nelle procedure di accesso causati da guasti tecnici;
+- Perdita temporanea di dati o errori di sincronizzazione dipendenti da fattori esterni
+(connettività, infrastruttura cloud di terzi, etc.).
+
+4. Obblighi del Comodatario
+Il soggetto utilizzatore si impegna a utilizzare l'applicativo secondo le istruzioni fornite e nel pieno
+rispetto delle normative vigenti in materia di protezione dei dati personali (GDPR), manlevando la
+Sezione da ogni responsabilità derivante da un uso improprio o non autorizzato dello strumento.
+
+L'utilizzo dell'applicativo da parte di terze parti equivale all'accettazione integrale dei presenti termini.
