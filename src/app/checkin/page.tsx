@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 import { supabase } from '@/lib/supabase';
+import LicenseFooter from '@/components/LicenseFooter';
 
 export default function CheckinPage() {
   const [scanResult, setScanResult] = useState<any>(null);
@@ -164,10 +165,7 @@ export default function CheckinPage() {
           )}
         </div>
 
-        <footer style={{ marginTop: 'auto', padding: '20px', textAlign: 'center', color: '#888' }}>
-          Sistema di Verifica LNI Messina<br />
-          <a href="/operator" style={{ color: '#007bff', fontSize: '14px', textDecoration: 'none' }}>Home Operatore</a>
-        </footer>
+        <LicenseFooter />
       </div>
   );
 }

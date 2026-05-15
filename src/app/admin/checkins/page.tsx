@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import LicenseFooter from '@/components/LicenseFooter';
 
 interface CheckinLog {
   id: string;
@@ -100,6 +101,7 @@ export default function AdminCheckinsPage() {
             </table>
           </div>
         )}
+      <LicenseFooter />
       </div>
     </div>
   )

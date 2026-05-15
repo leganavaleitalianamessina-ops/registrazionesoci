@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import LicenseFooter from '@/components/LicenseFooter';
 
 interface User {
   id: string;
@@ -184,6 +185,7 @@ export default function AdminUsersPage() {
             </table>
           </div>
         )}
+      <LicenseFooter />
       </div>
     </div>
   )

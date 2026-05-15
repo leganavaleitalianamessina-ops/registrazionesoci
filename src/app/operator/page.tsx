@@ -3,6 +3,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import OperatorGuard from '@/components/OperatorGuard';
+import LicenseFooter from '@/components/LicenseFooter';
 
 export default function OperatorHomePage() {
   const router = useRouter();
@@ -43,6 +44,7 @@ export default function OperatorHomePage() {
             <div style={{ fontSize: '14px', color: '#888', marginTop: '6px' }}>Visualizza ingressi nelle ultime ore</div>
           </button>
         </div>
+      <LicenseFooter />
       </div>
     </OperatorGuard>
   );

@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import LicenseFooter from '@/components/LicenseFooter';
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -106,10 +107,7 @@ export default function AdminDashboard() {
             </div>
           </div>
         )}
-        <footer style={{ marginTop: '40px', padding: '20px', textAlign: 'center', fontSize: '12px', color: '#999', borderTop: '1px solid #ddd' }}>
-          &copy; {new Date().getFullYear()} Lega Navale Italiana - Sezione di Messina<br />
-          <a href="/LICENSE.txt" target="_blank" style={{ color: '#666', textDecoration: 'underline' }}>Licenza d'Uso</a>
-        </footer>
+        <LicenseFooter />
       </div>
     </div>
   )

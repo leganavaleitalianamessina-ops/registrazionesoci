@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import OperatorGuard from '@/components/OperatorGuard';
+import LicenseFooter from '@/components/LicenseFooter';
 
 interface LogEntry {
   id: string;
@@ -110,6 +111,7 @@ export default function OperatorAccessiPage() {
             })}
           </div>
         )}
+      <LicenseFooter />
       </div>
     </OperatorGuard>
   );
