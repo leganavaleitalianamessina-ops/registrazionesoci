@@ -47,10 +47,12 @@ export async function POST(req: Request) {
   const body = await req.json()
   const { first_name, last_name, email, phone, user_type, gdpr_consent, marketing_consent } = body
 
+  const userData_email = email?.trim() || null;
+
   const { data: userData, error: userError } = await supabase
     .from('users')
     .insert({
-      first_name, last_name, email, phone,
+      first_name, last_name, email: userData_email, phone,
       user_type: user_type || 'active_member',
       status: 'active',
       gdpr_consent: gdpr_consent || false,

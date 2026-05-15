@@ -15,7 +15,7 @@ function getClientIp(req: NextRequest): string {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { firstName, lastName, email, phone, gdprConsent, marketingConsent, website, elapsed } = body;
+    const { firstName, lastName, phone, gdprConsent, marketingConsent, website, elapsed } = body;
 
     // Honeypot: if invisible field is filled, it's a bot
     if (website) {
@@ -26,18 +26,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Richiesta troppo rapida. Ricarica la pagina e riprova.' }, { status: 403 });
     }
 
-    const cleanEmail = email.trim().toLowerCase();
     const cleanFirstName = firstName.trim();
     const cleanLastName = lastName.trim();
+    const cleanPhone = phone.trim();
 
+    // Check duplicate phone
     const { data: existingUser } = await supabase
       .from('users')
       .select('id, first_name, last_name')
-      .eq('email', cleanEmail)
+      .eq('phone', cleanPhone)
       .maybeSingle();
 
     if (existingUser) {
-      // Check if user already has an active QR token
       const { data: activeToken } = await supabase
         .from('qr_tokens')
         .select('token')
@@ -47,15 +47,14 @@ export async function POST(req: NextRequest) {
 
       if (activeToken) {
         return NextResponse.json(
-          { error: "Questa email è già registrata e verificata. Usa la funzione 'Recupera QRCode' nella Home Page." },
+          { error: "Questo numero di telefono è già registrato. Usa 'Recupera QRCode' nella Home Page." },
           { status: 409 }
         );
       }
-      // Create a fresh active token
       const token = Math.random().toString(36).substring(2, 10).toUpperCase();
       await supabase.from('qr_tokens').insert({ user_id: existingUser.id, token, is_active: true });
       return NextResponse.json({
-        userId: existingUser.id, token, email: cleanEmail,
+        userId: existingUser.id, token, phone: cleanPhone,
         firstName: existingUser.first_name, lastName: existingUser.last_name,
       });
     }
@@ -67,8 +66,8 @@ export async function POST(req: NextRequest) {
       .insert({
         first_name: cleanFirstName,
         last_name: cleanLastName,
-        email: cleanEmail,
-        phone: phone.trim(),
+        email: null,
+        phone: cleanPhone,
         user_type: 'pre_member',
         status: 'active',
         gdpr_consent: gdprConsent || false,
@@ -82,7 +81,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Errore durante la registrazione. Riprova.' }, { status: 500 });
     }
 
-    // Log GDPR consent (using checkin_logs table for audit trail)
+    // Log GDPR consent
     const userAgent = req.headers.get('user-agent') || 'unknown';
     if (gdprConsent) {
       await supabase.from('checkin_logs').insert({
@@ -101,7 +100,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Create active QR token immediately (no email confirmation needed)
+    // Create active QR token immediately
     const token = Math.random().toString(36).substring(2, 10).toUpperCase();
     const { error: tokenError } = await supabase
       .from('qr_tokens')
@@ -111,8 +110,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Errore durante la generazione del QR code.' }, { status: 500 });
     }
 
+    // Fetch back with firstName, lastName from DB
     return NextResponse.json({
-      userId: userData.id, token, email: cleanEmail,
+      userId: userData.id, token, phone: cleanPhone,
       firstName: cleanFirstName, lastName: cleanLastName,
     });
   } catch (err: any) {

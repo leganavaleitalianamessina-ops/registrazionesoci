@@ -10,55 +10,51 @@ export default function RecoverQRPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [website, setWebsite] = useState('');
   const [qrToken, setQrToken] = useState<string | null>(null);
   const [qrFirstName, setQrFirstName] = useState('');
   const [qrLastName, setQrLastName] = useState('');
-  const [emailSent, setEmailSent] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     setQrToken(null);
-    setEmailSent(false);
+
+    // Honeypot check
+    if (website) {
+      setError('Richiesta non valida.');
+      setLoading(false);
+      return;
+    }
+    // Time-to-submit check
+    const elapsed = Date.now() - formLoadedAt.current;
+    if (elapsed < 3000) {
+      setError('Troppo rapido. Ricarica la pagina e riprova.');
+      setLoading(false);
+      return;
+    }
 
     try {
-      const { data, error: userError } = await supabase
+      const { data, error: fetchError } = await supabase
         .from('users')
-        .select('id, first_name, last_name, email, qr_tokens!inner(token)')
-        .eq('email', email)
+        .select('id, first_name, last_name, qr_tokens!inner(token)')
+        .eq('phone', phone)
         .eq('qr_tokens.is_active', true)
-        .single();
+        .maybeSingle();
 
-      if (userError || !data) {
-        throw new Error("Indirizzo email non trovato o nessun QR code attivo.");
+      if (fetchError || !data) {
+        throw new Error("Nessun QR code attivo trovato per questo numero di telefono.");
       }
 
       const tokens = (data as any).qr_tokens;
       const token = Array.isArray(tokens) ? tokens[0]?.token : tokens?.token;
-      if (!token) throw new Error("Nessun codice associato a questa email.");
+      if (!token) throw new Error("Nessun QR code attivo trovato.");
 
-      // Show QR immediately
       setQrToken(token);
       setQrFirstName(data.first_name);
       setQrLastName(data.last_name);
-
-      // Send email asynchronously (silent fail)
-      fetch('/api/send-qr', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: data.email,
-          firstName: data.first_name,
-          lastName: data.last_name,
-          token,
-          elapsed: Date.now() - formLoadedAt.current,
-          website,
-        }),
-      }).then(r => { if (r.ok) setEmailSent(true); }).catch(() => {});
-
       setSuccess(true);
     } catch (err: any) {
       setError(err.message || 'Errore durante la ricerca.');
@@ -90,11 +86,6 @@ export default function RecoverQRPage() {
             Il tuo codice personale:<br />
             <strong style={{ fontSize: '28px', color: '#003366', letterSpacing: '3px' }}>{qrToken}</strong>
           </p>
-          <p style={{ fontSize: '18px', color: '#666', marginTop: '20px' }}>
-            {emailSent
-              ? <>Email inviata a <strong>{email}</strong></>
-              : <>La email potrebbe essere in arrivo (controlla anche lo spam)</>}
-          </p>
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '30px', flexWrap: 'wrap' }}>
             <button onClick={() => window.open(`/validate/${qrToken}`, '_blank')} className="button-legacy" style={{ padding: '20px 30px', fontSize: '24px' }}>
               Visualizza QR Code
@@ -103,11 +94,6 @@ export default function RecoverQRPage() {
               Torna alla Home
             </button>
           </div>
-          {!emailSent && (
-            <p style={{ fontSize: '14px', color: '#888', marginTop: '20px' }}>
-              Puoi salvare il QR code premendo "Visualizza QR Code" e poi "Salva sul telefono".
-            </p>
-          )}
         </div>
       </div>
     );
@@ -126,27 +112,28 @@ export default function RecoverQRPage() {
         <h2>Recupero QRCode</h2>
       </div>
       
-      <p>Inserisci l'indirizzo email usato durante la registrazione per ricevere nuovamente il tuo codice di accesso.</p>
+      <p>Inserisci il numero di telefono usato durante la registrazione per visualizzare il tuo QR Code.</p>
 
       <form onSubmit={handleSubmit}>
         <div style={{ position: 'absolute', left: '-9999px' }} aria-hidden="true">
           <label htmlFor="website">Website</label>
           <input id="website" name="website" type="text" value={website} onChange={(e) => setWebsite(e.target.value)} tabIndex={-1} autoComplete="off" />
         </div>
-        <label className="label-legacy">Indirizzo Email</label>
+        <label className="label-legacy">Numero di Telefono</label>
         <input
           required
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          type="tel"
+          pattern="[0-9]{9,15}"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
           className="input-legacy"
-          placeholder="esempio@email.it"
+          placeholder="Es. 3201234567"
         />
 
         {error && <div style={{ color: 'red', fontSize: '22px', marginTop: '20px', textAlign: 'center' }}>❌ {error}</div>}
         
         <button type="submit" disabled={loading} className="button-legacy">
-          {loading ? 'Ricerca in corso...' : 'Invia QRCode'}
+          {loading ? 'Ricerca in corso...' : 'Mostra QR Code'}
         </button>
 
         <button type="button" onClick={() => window.location.href = '/'} className="button-legacy" style={{ backgroundColor: '#6c757d', marginTop: '20px' }}>

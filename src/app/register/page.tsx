@@ -14,7 +14,6 @@ export default function RegisterPage() {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
-    email: '',
     phone: '',
     website: '',
     gdprConsent: false,
@@ -22,8 +21,7 @@ export default function RegisterPage() {
   });
 
   const [qrToken, setQrToken] = useState<string | null>(null);
-  const [qrEmail, setQrEmail] = useState<string | null>(null);
-  const [qrUserId, setQrUserId] = useState<string | null>(null);
+  const [qrPhone, setQrPhone] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -39,7 +37,6 @@ export default function RegisterPage() {
     setError(null);
 
     try {
-      const cleanEmail = formData.email.trim().toLowerCase();
       const cleanFirstName = formData.firstName.trim().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
       const cleanLastName = formData.lastName.trim().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
 
@@ -49,7 +46,6 @@ export default function RegisterPage() {
         body: JSON.stringify({
           firstName: cleanFirstName,
           lastName: cleanLastName,
-          email: cleanEmail,
           phone: formData.phone.trim(),
           gdprConsent: formData.gdprConsent,
           marketingConsent: formData.marketingConsent,
@@ -65,25 +61,8 @@ export default function RegisterPage() {
       }
 
       setQrToken(data.token);
-      setQrEmail(data.email);
-      setQrUserId(data.userId);
+      setQrPhone(data.phone);
       setSuccess(true);
-
-      // Send QR code via email as convenience (silent fail)
-      try {
-        await fetch('/api/send-qr', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: data.email,
-            firstName: data.firstName,
-            lastName: data.lastName,
-            token: data.token,
-          }),
-        });
-      } catch (emailErr) {
-        console.error('Errore invio email QR:', emailErr);
-      }
     } catch (err: any) {
       setError(err.message || 'Errore di comunicazione. Riprova.');
     } finally {
@@ -112,12 +91,11 @@ export default function RegisterPage() {
             <strong style={{ fontSize: '28px', color: '#003366', letterSpacing: '3px' }}>{qrToken}</strong>
           </p>
           <p style={{ fontSize: '18px', color: '#666', marginTop: '20px', lineHeight: '1.5' }}>
-            Ti abbiamo inviato una email con il QR code a<br />
-            <strong>{qrEmail}</strong>
-          </p>
-          <p style={{ fontSize: '16px', color: '#888', marginTop: '20px', lineHeight: '1.5' }}>
             Mostra questo QR code all&apos;operatore per il check-in.
           </p>
+          {qrPhone && <p style={{ fontSize: '14px', color: '#aaa', marginTop: '10px' }}>
+            Puoi recuperare il QR code in qualsiasi momento inserendo il numero <strong>{qrPhone}</strong> nella pagina Recupera QR.
+          </p>}
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '30px', flexWrap: 'wrap' }}>
             <button onClick={() => window.open(`/validate/${qrToken}`, '_blank')} className="button-legacy">
               Visualizza QR Code
@@ -154,9 +132,6 @@ export default function RegisterPage() {
 
         <label className="label-legacy">Cognome *</label>
         <input required name="lastName" value={formData.lastName} onChange={handleChange} className="input-legacy" />
-
-        <label className="label-legacy">Email *</label>
-        <input required type="email" name="email" value={formData.email} onChange={handleChange} className="input-legacy" />
 
         <label className="label-legacy">Telefono *</label>
         <input required type="tel" name="phone" pattern="[0-9]{9,15}" value={formData.phone} onChange={handleChange} className="input-legacy" />
