@@ -6,6 +6,7 @@
 // Esecuzione: ogni lunedì via GitHub Actions
 
 import { createClient } from '@supabase/supabase-js';
+import ws from 'ws';
 import nodemailer from 'nodemailer';
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
@@ -23,7 +24,9 @@ if (!EMAIL_USER || !EMAIL_PASS) {
   process.exit(1);
 }
 
-const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
+  realtime: { transport: ws },
+});
 
 function getWeekRange() {
   const now = new Date();
