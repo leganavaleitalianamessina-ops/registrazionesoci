@@ -47,6 +47,14 @@ export async function POST(req: Request) {
   const body = await req.json()
   const { first_name, last_name, email, phone, user_type, gdpr_consent, marketing_consent } = body
 
+  // Check duplicate phone
+  if (phone) {
+    const { data: existing } = await supabase.from('users').select('id').eq('phone', phone).maybeSingle()
+    if (existing) {
+      return NextResponse.json({ error: 'Questo numero di telefono è già associato a un altro utente.' }, { status: 409 })
+    }
+  }
+
   const userData_email = email?.trim() || null;
 
   const { data: userData, error: userError } = await supabase
