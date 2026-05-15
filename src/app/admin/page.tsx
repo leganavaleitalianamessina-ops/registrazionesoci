@@ -8,6 +8,7 @@ export default function AdminDashboard() {
   const router = useRouter();
   const [adminRole, setAdminRole] = useState<string | null>(null);
   const [stats, setStats] = useState({ users: 0, activeMembers: 0, preMembers: 0, activeQr: 0, todayCheckins: 0 });
+  const [weeklyReport, setWeeklyReport] = useState(true);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -25,6 +26,13 @@ export default function AdminDashboard() {
         .single()
       setAdminRole(roleData?.role || null)
 
+      // Fetch weekly report status
+      try {
+        const r = await fetch('/api/admin/weekly-report-status')
+        const d = await r.json()
+        setWeeklyReport(d.enabled)
+      } catch {}
+
       const today = new Date().toISOString().split('T')[0]
       const { count: u } = await supabase.from('users').select('*', { count: 'exact', head: true })
       const { count: am } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('user_type', 'active_member')
@@ -40,6 +48,17 @@ export default function AdminDashboard() {
       setReady(true)
     })()
   }, [])
+
+  const toggleWeeklyReport = async () => {
+    const newVal = !weeklyReport
+    setWeeklyReport(newVal)
+    try {
+      await fetch('/api/admin/weekly-report-status', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled: newVal }),
+      })
+    } catch {}
+  }
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -66,6 +85,26 @@ export default function AdminDashboard() {
             <NavButton label="Registrazione Pubblica" desc="Torna al modulo di pre-iscrizione pubblico" onClick={() => window.open('/register', '_blank')} color="#6c757d" />
           )}
         </div>
+        {adminRole === 'admin_full' && (
+          <div style={{ background: 'white', borderRadius: '12px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', marginTop: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div>
+                <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#333' }}>Report Settimanale Email</div>
+                <div style={{ fontSize: '14px', color: '#888', marginTop: '4px' }}>Invia ogni lunedì le statistiche a leganavaleitalianamessina@gmail.com</div>
+              </div>
+              <button onClick={toggleWeeklyReport} style={{
+                width: '60px', height: '32px', borderRadius: '16px', border: 'none', cursor: 'pointer',
+                background: weeklyReport ? '#28a745' : '#ccc', position: 'relative', transition: 'background 0.3s',
+              }}>
+                <span style={{
+                  position: 'absolute', top: '3px', width: '26px', height: '26px', borderRadius: '50%',
+                  background: 'white', transition: 'left 0.3s',
+                  left: weeklyReport ? '31px' : '3px',
+                }} />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

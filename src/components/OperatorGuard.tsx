@@ -31,6 +31,22 @@ export default function OperatorGuard({ children }: OperatorGuardProps) {
     setLoading(true);
     setError(null);
 
+    // Rate limit check
+    try {
+      const rl = await fetch('/api/auth/check-rate-limit', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ loginType: 'operator' }),
+      });
+      const rlData = await rl.json();
+      if (!rlData.allowed) {
+        setError(`Troppi tentativi. Riprova tra ${rlData.retryAfterMinutes} minuti.`);
+        setLoading(false);
+        return;
+      }
+    } catch {
+      // If rate limit API fails, proceed anyway
+    }
+
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email: 'operatore@leganavale.it',
       password,
@@ -39,8 +55,18 @@ export default function OperatorGuard({ children }: OperatorGuardProps) {
     if (signInError) {
       setError('Credenziali non valide');
       setLoading(false);
+      // Log failed attempt
+      fetch('/api/auth/log-attempt', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ loginType: 'operator', success: false }),
+      }).catch(() => {});
     } else {
       setAuthenticated(true);
+      // Log successful attempt
+      fetch('/api/auth/log-attempt', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ loginType: 'operator', success: true }),
+      }).catch(() => {});
     }
   };
 

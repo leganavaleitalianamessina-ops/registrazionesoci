@@ -19,6 +19,22 @@ function LoginForm() {
     setLoading(true);
     setError(null);
 
+    // Rate limit check
+    try {
+      const rl = await fetch('/api/auth/check-rate-limit', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ loginType: 'admin' }),
+      });
+      const rlData = await rl.json();
+      if (!rlData.allowed) {
+        setError(`Troppi tentativi. Riprova tra ${rlData.retryAfterMinutes} minuti.`);
+        setLoading(false);
+        return;
+      }
+    } catch {
+      // If rate limit API fails, proceed anyway
+    }
+
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -27,8 +43,16 @@ function LoginForm() {
     if (signInError) {
       setError('Credenziali non valide. Riprova.');
       setLoading(false);
+      fetch('/api/auth/log-attempt', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ loginType: 'admin', success: false }),
+      }).catch(() => {});
     } else {
       router.push(redirect);
+      fetch('/api/auth/log-attempt', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ loginType: 'admin', success: true }),
+      }).catch(() => {});
     }
   };
 
