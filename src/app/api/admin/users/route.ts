@@ -91,6 +91,13 @@ export async function PUT(req: Request) {
   const body = await req.json()
   const { id, ...updateData } = body
 
+  if (updateData.phone) {
+    const { data: existing } = await supabase.from('users').select('id').eq('phone', updateData.phone).neq('id', id).maybeSingle()
+    if (existing) {
+      return NextResponse.json({ error: 'Questo numero di telefono è già associato a un altro utente.' }, { status: 409 })
+    }
+  }
+
   const { data, error } = await supabase
     .from('users')
     .update(updateData)

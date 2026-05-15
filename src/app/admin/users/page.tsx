@@ -37,6 +37,7 @@ export default function AdminUsersPage() {
   const [tipoFilter, setTipoFilter] = useState<'all' | 'active_member' | 'pre_member'>('all');
   const [showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [formError, setFormError] = useState('');
   const [form, setForm] = useState({ first_name: '', last_name: '', email: '', phone: '', user_type: 'active_member' as string });
 
   const fetchUsers = async () => {
@@ -49,16 +50,14 @@ export default function AdminUsersPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (editingUser) {
-      await apiFetch('/api/admin/users', {
-        method: 'PUT',
-        body: JSON.stringify({ id: editingUser.id, ...form }),
-      })
-    } else {
-      await apiFetch('/api/admin/users', {
-        method: 'POST',
-        body: JSON.stringify(form),
-      })
+    setFormError('')
+    const res = editingUser
+      ? await apiFetch('/api/admin/users', { method: 'PUT', body: JSON.stringify({ id: editingUser.id, ...form }) })
+      : await apiFetch('/api/admin/users', { method: 'POST', body: JSON.stringify(form) })
+    if (!res.ok) {
+      const err = await res.json()
+      setFormError(err.error || 'Errore durante il salvataggio')
+      return
     }
     setShowForm(false)
     setEditingUser(null)
@@ -120,6 +119,7 @@ export default function AdminUsersPage() {
         {showForm && (
           <form onSubmit={handleSubmit} style={{ background: 'white', padding: '25px', borderRadius: '12px', marginBottom: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
             <h3 style={{ margin: '0 0 20px 0', fontSize: '20px' }}>{editingUser ? 'Modifica Utente' : 'Nuovo Socio'}</h3>
+            {formError && <div style={{ background: '#f8d7da', color: '#721c24', padding: '12px 16px', borderRadius: '8px', marginBottom: '15px', fontSize: '15px' }}>{formError}</div>}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
               <input required placeholder="Nome" value={form.first_name} onChange={e => setForm(p => ({ ...p, first_name: e.target.value }))} style={inputStyle} />
               <input required placeholder="Cognome" value={form.last_name} onChange={e => setForm(p => ({ ...p, last_name: e.target.value }))} style={inputStyle} />
