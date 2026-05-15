@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useRef, useState } from 'react';
-import { CheckCircle2, Loader2, Mail } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import Image from 'next/image';
+import QRCodeDisplay from '@/components/QRCodeDisplay';
 
 export default function RegisterPage() {
   const formLoadedAt = useRef(Date.now());
@@ -19,6 +20,10 @@ export default function RegisterPage() {
     gdprConsent: false,
     marketingConsent: false,
   });
+
+  const [qrToken, setQrToken] = useState<string | null>(null);
+  const [qrEmail, setQrEmail] = useState<string | null>(null);
+  const [qrUserId, setQrUserId] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -59,24 +64,25 @@ export default function RegisterPage() {
         throw new Error(data.error || 'Errore di comunicazione. Riprova.');
       }
 
+      setQrToken(data.token);
+      setQrEmail(data.email);
+      setQrUserId(data.userId);
       setSuccess(true);
 
-      // Send confirmation email (silent fail)
+      // Send QR code via email as convenience (silent fail)
       try {
         await fetch('/api/send-qr', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            userId: data.userId,
-            email: formData.email,
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            type: 'confirmation',
-            confirmToken: data.confirmToken,
+            email: data.email,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            token: data.token,
           }),
         });
       } catch (emailErr) {
-        console.error('Errore invio email conferma:', emailErr);
+        console.error('Errore invio email QR:', emailErr);
       }
     } catch (err: any) {
       setError(err.message || 'Errore di comunicazione. Riprova.');
@@ -92,32 +98,37 @@ export default function RegisterPage() {
           <div style={{ height: '80px', width: 'auto' }}>
             <img src="/logo.png" alt="Logo" style={{ height: '100%', width: 'auto' }} />
           </div>
-          <h2>Conferma la tua Email</h2>
+          <h2>Iscrizione Completata!</h2>
         </div>
-        <div style={{ textAlign: 'center', padding: '20px' }}>
-          <Mail size={64} style={{ color: '#007bff', marginTop: '20px' }} />
-          <p style={{ fontSize: '22px', marginTop: '30px', lineHeight: '1.6' }}>
-            Ti abbiamo inviato una email di conferma a<br />
-            <strong>{formData.email}</strong>
-          </p>
-          <p style={{ fontSize: '18px', color: '#666', marginTop: '10px', lineHeight: '1.5' }}>
-            Clicca sul link presente nell&apos;email per verificare il tuo indirizzo<br />
-            e ricevere il tuo QRCode personale.
-          </p>
+        <div style={{ textAlign: 'center', padding: '20px', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{
-            marginTop: '30px', padding: '20px', background: '#fff3cd', borderRadius: '12px',
-            border: '1px solid #ffc107', display: 'inline-block', textAlign: 'left', maxWidth: '450px'
+            padding: '20px', backgroundColor: 'white', borderRadius: '20px',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.1)', display: 'inline-block', marginTop: '10px'
           }}>
-            <p style={{ fontSize: '16px', color: '#856404', margin: 0 }}>
-              <strong>📌 Non hai ricevuto l&apos;email?</strong><br />
-              1. Controlla la cartella Spam / Promozioni<br />
-              2. Assicurati di aver inserito l&apos;email corretta<br />
-              3. Se il problema persiste, contatta un amministratore
-            </p>
+            <QRCodeDisplay token={qrToken || ''} size={260} />
           </div>
-          <button onClick={() => window.location.href = '/'} className="button-legacy" style={{ backgroundColor: '#666', marginTop: '30px' }}>
-            Torna alla Home
-          </button>
+          <p style={{ fontSize: '18px', color: '#666', marginTop: '20px', lineHeight: '1.5' }}>
+            Il tuo codice personale:<br />
+            <strong style={{ fontSize: '28px', color: '#003366', letterSpacing: '3px' }}>{qrToken}</strong>
+          </p>
+          <p style={{ fontSize: '18px', color: '#666', marginTop: '20px', lineHeight: '1.5' }}>
+            Ti abbiamo inviato una email con il QR code a<br />
+            <strong>{qrEmail}</strong>
+          </p>
+          <p style={{ fontSize: '16px', color: '#888', marginTop: '20px', lineHeight: '1.5' }}>
+            Mostra questo QR code all&apos;operatore per il check-in.
+          </p>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '30px', flexWrap: 'wrap' }}>
+            <button onClick={() => window.open(`/validate/${qrToken}`, '_blank')} className="button-legacy">
+              Visualizza QR Code
+            </button>
+            <button onClick={() => window.location.href = '/'} className="button-legacy" style={{ backgroundColor: '#666' }}>
+              Torna alla Home
+            </button>
+          </div>
+          <p style={{ fontSize: '14px', color: '#aaa', marginTop: '30px' }}>
+            Puoi recuperare il QR code in qualsiasi momento dalla home page.
+          </p>
         </div>
       </div>
     );
@@ -171,7 +182,7 @@ export default function RegisterPage() {
         {error && <div style={{ color: 'red', fontSize: '24px', textAlign: 'center', margin: '20px 0' }}>❌ {error}</div>}
 
         <button type="submit" disabled={loading} className="button-legacy">
-          {loading ? 'Invio in corso...' : 'Registrati e ricevi email di conferma'}
+          {loading ? 'Invio in corso...' : 'Registrati e ricevi il tuo QR Code'}
         </button>
       </form>
     </div>

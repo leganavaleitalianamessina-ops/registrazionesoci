@@ -32,15 +32,15 @@ export async function POST(req: NextRequest) {
 
     const { data: existingUser } = await supabase
       .from('users')
-      .select('id')
+      .select('id, first_name, last_name')
       .eq('email', cleanEmail)
       .maybeSingle();
 
     if (existingUser) {
-      // Check if user already has an active QR token (already verified)
+      // Check if user already has an active QR token
       const { data: activeToken } = await supabase
         .from('qr_tokens')
-        .select('id')
+        .select('token')
         .eq('user_id', existingUser.id)
         .eq('is_active', true)
         .maybeSingle();
@@ -51,22 +51,13 @@ export async function POST(req: NextRequest) {
           { status: 409 }
         );
       }
-      // Reuse existing inactive token or create a new one
-      let confirmToken: string;
-      const { data: existingInactive } = await supabase
-        .from('qr_tokens')
-        .select('token')
-        .eq('user_id', existingUser.id)
-        .eq('is_active', false)
-        .maybeSingle();
-
-      if (existingInactive) {
-        confirmToken = existingInactive.token;
-      } else {
-        confirmToken = Math.random().toString(36).substring(2, 10).toUpperCase();
-        await supabase.from('qr_tokens').insert({ user_id: existingUser.id, token: confirmToken, is_active: false });
-      }
-      return NextResponse.json({ userId: existingUser.id, resend: true, email: cleanEmail, confirmToken });
+      // Create a fresh active token
+      const token = Math.random().toString(36).substring(2, 10).toUpperCase();
+      await supabase.from('qr_tokens').insert({ user_id: existingUser.id, token, is_active: true });
+      return NextResponse.json({
+        userId: existingUser.id, token, email: cleanEmail,
+        firstName: existingUser.first_name, lastName: existingUser.last_name,
+      });
     }
 
     const ip = getClientIp(req);
@@ -110,17 +101,20 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Create confirmation token in qr_tokens (is_active = false until email verified)
-    const confirmToken = Math.random().toString(36).substring(2, 10).toUpperCase();
+    // Create active QR token immediately (no email confirmation needed)
+    const token = Math.random().toString(36).substring(2, 10).toUpperCase();
     const { error: tokenError } = await supabase
       .from('qr_tokens')
-      .insert({ user_id: userData.id, token: confirmToken, is_active: false });
+      .insert({ user_id: userData.id, token, is_active: true });
 
     if (tokenError) {
-      return NextResponse.json({ error: 'Errore durante la generazione del token di conferma.' }, { status: 500 });
+      return NextResponse.json({ error: 'Errore durante la generazione del QR code.' }, { status: 500 });
     }
 
-    return NextResponse.json({ userId: userData.id, email: cleanEmail, confirmToken });
+    return NextResponse.json({
+      userId: userData.id, token, email: cleanEmail,
+      firstName: cleanFirstName, lastName: cleanLastName,
+    });
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Errore di comunicazione.' }, { status: 500 });
   }

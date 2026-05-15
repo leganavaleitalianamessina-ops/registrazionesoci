@@ -43,7 +43,7 @@ export default function StampaRegistrazionePage() {
         <strong>Come fare:</strong><br />
         1. Inquadra il QR code con la fotocamera del telefono<br />
         2. Compila il modulo di pre-iscrizione<br />
-        3. Riceverai il tuo QR code personale via email<br />
+        3. Il tuo QR code personale verrà mostrato subito a schermo<br />
         4. Presenta il QR code all&apos;ingresso per il check-in
       </div>
 
