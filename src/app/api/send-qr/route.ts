@@ -70,7 +70,7 @@ export async function POST(req: Request) {
             <div style="background-color: #f4f4f4; padding: 20px; text-align: center; font-size: 12px; color: #888;">
               &copy; ${new Date().getFullYear()} Lega Navale Italiana - Sezione di Messina<br>
               <a href="${privacyUrl}" style="color: #888; text-decoration: underline;">Informativa Privacy</a><br><br>
-              Questa è un'email automatica, per favore non rispondere.
+              ⚠️ Questo messaggio è stato generato automaticamente dal sistema di pre-iscrizione. Si prega di non rispondere.
             </div>
           </div>
         `,
@@ -115,7 +115,7 @@ export async function POST(req: Request) {
           <div style="background-color: #f4f4f4; padding: 20px; text-align: center; font-size: 12px; color: #888;">
             &copy; ${new Date().getFullYear()} Lega Navale Italiana - Sezione di Messina<br>
             <a href="${privacyUrl}" style="color: #888; text-decoration: underline;">Informativa Privacy</a><br><br>
-            Questa è un'email automatica, per favore non rispondere.
+            ⚠️ Questo messaggio è stato generato automaticamente dal sistema di pre-iscrizione. Si prega di non rispondere.
           </div>
         </div>
       `,
