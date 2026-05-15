@@ -33,6 +33,7 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [tipoFilter, setTipoFilter] = useState<'all' | 'active_member' | 'pre_member'>('all');
   const [showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [form, setForm] = useState({ first_name: '', last_name: '', email: '', phone: '', user_type: 'active_member' as string });
@@ -77,9 +78,11 @@ export default function AdminUsersPage() {
   }
 
   const statusColor = (s: string) => s === 'active' ? '#28a745' : s === 'expired' ? '#ffc107' : '#dc3545'
-  const filtered = users.filter(u =>
-    `${u.first_name} ${u.last_name} ${u.email}`.toLowerCase().includes(search.toLowerCase())
-  )
+  const filtered = users.filter(u => {
+    const matchSearch = `${u.first_name} ${u.last_name} ${u.email}`.toLowerCase().includes(search.toLowerCase());
+    const matchTipo = tipoFilter === 'all' || u.user_type === tipoFilter;
+    return matchSearch && matchTipo;
+  })
 
   if (loading) return <div style={{ textAlign: 'center', fontSize: '24px', padding: '60px', background: '#f0f2f5', minHeight: '100vh', fontFamily: 'Arial, sans-serif' }}>Caricamento...</div>
 
@@ -91,8 +94,24 @@ export default function AdminUsersPage() {
         <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
           <input placeholder="Cerca nome, cognome o email..." value={search} onChange={e => setSearch(e.target.value)}
             style={{ flex: 1, minWidth: '200px', padding: '14px 18px', border: '2px solid #ddd', borderRadius: '10px', fontSize: '17px' }} />
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+            {(['all', 'active_member', 'pre_member'] as const).map(t => {
+              const label = t === 'all' ? 'Tutti' : t === 'active_member' ? 'Soci Attivi' : 'Pre-Aderenti';
+              const active = tipoFilter === t;
+              return (
+                <button key={t} onClick={() => setTipoFilter(t)}
+                  style={{
+                    padding: '10px 18px', border: '2px solid', borderRadius: '8px', fontSize: '15px', cursor: 'pointer',
+                    background: active ? '#003366' : 'white', color: active ? 'white' : '#003366',
+                    borderColor: '#003366', fontWeight: active ? 'bold' : 'normal',
+                  }}>
+                  {label}
+                </button>
+              );
+            })}
+          </div>
           <button onClick={() => { setEditingUser(null); setForm({ first_name: '', last_name: '', email: '', phone: '', user_type: 'active_member' }); setShowForm(true) }}
-            style={{ padding: '14px 30px', background: '#007bff', color: 'white', border: 'none', borderRadius: '10px', fontSize: '17px', fontWeight: 'bold', cursor: 'pointer' }}>
+            style={{ padding: '14px 30px', background: '#007bff', color: 'white', border: 'none', borderRadius: '10px', fontSize: '17px', fontWeight: 'bold', cursor: 'pointer', whiteSpace: 'nowrap' }}>
             + Nuovo Socio
           </button>
         </div>
