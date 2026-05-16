@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env node
+#!/usr/bin/env node
 
 // Monthly Report Script (v2)
 // Genera e invia CSV di utenti e log del mese corrente

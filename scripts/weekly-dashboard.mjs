@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env node
+#!/usr/bin/env node
 
 // Weekly Dashboard Script (v2)
 // Invia email con statistiche settimanali + CSV aspiranti soci
