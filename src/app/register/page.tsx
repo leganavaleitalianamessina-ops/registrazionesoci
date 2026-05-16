@@ -4,6 +4,7 @@ import React, { useRef, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import QRCodeDisplay from '@/components/QRCodeDisplay';
+import SaveQRCard from '@/components/SaveQRCard';
 
 export default function RegisterPage() {
   const formLoadedAt = useRef(Date.now());
@@ -23,6 +24,8 @@ export default function RegisterPage() {
 
   const [qrToken, setQrToken] = useState<string | null>(null);
   const [qrPhone, setQrPhone] = useState<string | null>(null);
+  const [qrFirstName, setQrFirstName] = useState('');
+  const [qrLastName, setQrLastName] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -32,15 +35,31 @@ export default function RegisterPage() {
     }));
   };
 
+  const [dateError, setDateError] = useState('');
+
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let val = e.target.value.replace(/\D/g, '').slice(0, 8);
     if (val.length > 2) val = val.slice(0, 2) + '/' + val.slice(2);
     if (val.length > 5) val = val.slice(0, 5) + '/' + val.slice(5);
     setFormData((prev) => ({ ...prev, dateOfBirth: val }));
+    if (val.length === 10) {
+      const [d, m, y] = val.split('/').map(Number);
+      const dObj = new Date(y, m - 1, d);
+      if (dObj.getFullYear() !== y || dObj.getMonth() + 1 !== m || dObj.getDate() !== d || y < 1900 || y > 2099) {
+        setDateError('Data non valida. Verifica giorno, mese e anno.');
+      } else {
+        setDateError('');
+      }
+    } else if (val.length > 0) {
+      setDateError('Formato richiesto: DD/MM/AAAA');
+    } else {
+      setDateError('');
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (dateError) return;
     setLoading(true);
     setError(null);
 
@@ -71,6 +90,8 @@ export default function RegisterPage() {
 
       setQrToken(data.token);
       setQrPhone(data.phone);
+      setQrFirstName(data.firstName || cleanFirstName);
+      setQrLastName(data.lastName || cleanLastName);
       setSuccess(true);
     } catch (err: any) {
       setError(err.message || 'Errore di comunicazione. Riprova.');
@@ -89,23 +110,26 @@ export default function RegisterPage() {
           <h2>Iscrizione Completata!</h2>
         </div>
         <div style={{ textAlign: 'center', padding: '20px', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{
-            padding: '20px', backgroundColor: 'white', borderRadius: '20px',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.1)', display: 'inline-block', marginTop: '10px'
-          }}>
-            <QRCodeDisplay token={qrToken || ''} size={260} />
-          </div>
-          <p style={{ fontSize: '18px', color: '#666', marginTop: '20px', lineHeight: '1.5' }}>
-            Il tuo codice personale:<br />
-            <strong style={{ fontSize: '28px', color: '#003366', letterSpacing: '3px' }}>{qrToken}</strong>
-          </p>
-          <p style={{ fontSize: '18px', color: '#666', marginTop: '20px', lineHeight: '1.5' }}>
-            Mostra questo QR code all&apos;operatore per il check-in.
-          </p>
-          {qrPhone && <p style={{ fontSize: '14px', color: '#aaa', marginTop: '10px' }}>
-            Puoi recuperare il QR code in qualsiasi momento inserendo il numero <strong>{qrPhone}</strong> nella pagina Recupera QR.
-          </p>}
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '30px', flexWrap: 'wrap' }}>
+          <SaveQRCard fileName={`LNI_Messina_QR_${qrToken}`} firstName={qrFirstName} lastName={qrLastName} token={qrToken || ''}>
+            <div style={{ textAlign: 'center', padding: '25px' }}>
+              <img src="/logo.png" alt="LNI Messina" style={{ height: '60px', width: 'auto', marginBottom: '15px' }} />
+              <p style={{ fontSize: '18px', color: '#003366', fontWeight: 'bold', margin: '0 0 20px' }}>
+                Lega Navale Italiana — Sezione di Messina
+              </p>
+              <QRCodeDisplay token={qrToken || ''} size={260} />
+              <p style={{ fontSize: '18px', color: '#666', marginTop: '20px', lineHeight: '1.5' }}>
+                Il tuo codice personale:<br />
+                <strong style={{ fontSize: '28px', color: '#003366', letterSpacing: '3px' }}>{qrToken}</strong>
+              </p>
+              <p style={{ fontSize: '18px', color: '#666', marginTop: '20px', lineHeight: '1.5' }}>
+                Mostra questo QR code all&apos;operatore per il check-in.
+              </p>
+              {qrPhone && <p style={{ fontSize: '14px', color: '#aaa', marginTop: '10px' }}>
+                Puoi recuperare il QR code inserendo il numero <strong>{qrPhone}</strong> nella pagina Recupera QR.
+              </p>}
+            </div>
+          </SaveQRCard>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '20px', flexWrap: 'wrap' }}>
             <button onClick={() => window.open(`/validate/${qrToken}`, '_blank')} className="button-legacy">
               Visualizza QR Code
             </button>
@@ -113,9 +137,6 @@ export default function RegisterPage() {
               Torna alla Home
             </button>
           </div>
-          <p style={{ fontSize: '14px', color: '#aaa', marginTop: '30px' }}>
-            Puoi recuperare il QR code in qualsiasi momento dalla home page.
-          </p>
         </div>
       </div>
     );
@@ -143,7 +164,8 @@ export default function RegisterPage() {
         <input required name="lastName" value={formData.lastName} onChange={handleChange} className="input-legacy" />
 
         <label className="label-legacy">Data di Nascita *</label>
-        <input required type="text" name="dateOfBirth" inputMode="numeric" placeholder="DD/MM/AAAA" value={formData.dateOfBirth} onChange={handleDateChange} className="input-legacy" />
+        <input required type="text" name="dateOfBirth" inputMode="numeric" placeholder="DD/MM/AAAA" value={formData.dateOfBirth} onChange={handleDateChange} className="input-legacy" style={{ borderColor: dateError ? '#dc3545' : '#ccc' }} />
+        {dateError && <p style={{ color: '#dc3545', fontSize: '16px', marginTop: '5px' }}>{dateError}</p>}
 
         <label className="label-legacy">Telefono *</label>
         <input required type="tel" name="phone" pattern="[0-9]{9,15}" value={formData.phone} onChange={handleChange} className="input-legacy" />

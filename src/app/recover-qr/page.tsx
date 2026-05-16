@@ -4,6 +4,7 @@ import React, { useRef, useState } from 'react';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 import QRCodeDisplay from '@/components/QRCodeDisplay';
+import SaveQRCard from '@/components/SaveQRCard';
 
 export default function RecoverQRPage() {
   const formLoadedAt = useRef(Date.now());
@@ -73,20 +74,23 @@ export default function RecoverQRPage() {
           <h2>QR Code Recuperato</h2>
         </div>
         <div style={{ textAlign: 'center', padding: '20px', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <h3 style={{ fontSize: '28px', color: '#333', marginBottom: '20px' }}>
-            {qrFirstName} {qrLastName}
-          </h3>
-          <div style={{
-            padding: '20px', backgroundColor: 'white', borderRadius: '20px',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.1)', display: 'inline-block'
-          }}>
-            <QRCodeDisplay token={qrToken} size={260} />
-          </div>
-          <p style={{ fontSize: '18px', color: '#666', marginTop: '20px', lineHeight: '1.5' }}>
-            Il tuo codice personale:<br />
-            <strong style={{ fontSize: '28px', color: '#003366', letterSpacing: '3px' }}>{qrToken}</strong>
-          </p>
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '30px', flexWrap: 'wrap' }}>
+          <SaveQRCard fileName={`LNI_Messina_QR_${qrToken}`} firstName={qrFirstName} lastName={qrLastName} token={qrToken || ''}>
+            <div style={{ textAlign: 'center', padding: '25px' }}>
+              <img src="/logo.png" alt="LNI Messina" style={{ height: '60px', width: 'auto', marginBottom: '15px' }} />
+              <p style={{ fontSize: '18px', color: '#003366', fontWeight: 'bold', margin: '0 0 20px' }}>
+                Lega Navale Italiana — Sezione di Messina
+              </p>
+              <h3 style={{ fontSize: '28px', color: '#333', marginBottom: '20px' }}>
+                {qrFirstName} {qrLastName}
+              </h3>
+              <QRCodeDisplay token={qrToken} size={260} />
+              <p style={{ fontSize: '18px', color: '#666', marginTop: '20px', lineHeight: '1.5' }}>
+                Il tuo codice personale:<br />
+                <strong style={{ fontSize: '28px', color: '#003366', letterSpacing: '3px' }}>{qrToken}</strong>
+              </p>
+            </div>
+          </SaveQRCard>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '20px', flexWrap: 'wrap' }}>
             <button onClick={() => window.open(`/validate/${qrToken}`, '_blank')} className="button-legacy" style={{ padding: '20px 30px', fontSize: '24px' }}>
               Visualizza QR Code
             </button>
