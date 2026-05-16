@@ -44,6 +44,24 @@ export default function AdminUsersPage() {
     setLoading(false)
   }
 
+  const exportCSV = async () => {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return
+    const res = await fetch('/api/admin/users/export', {
+      headers: { 'Authorization': `Bearer ${session.access_token}` },
+    })
+    if (!res.ok) return
+    const blob = await res.blob()
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `utenti_${new Date().toISOString().slice(0, 10)}.csv`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
   useEffect(() => { fetchUsers() }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -92,6 +110,10 @@ export default function AdminUsersPage() {
           <button onClick={() => { setEditingUser(null); setForm({ first_name: '', last_name: '', date_of_birth: '', email: '', phone: '', user_type: 'active_member' }); setShowForm(true) }}
             style={{ padding: '14px 30px', background: '#007bff', color: 'white', border: 'none', borderRadius: '10px', fontSize: '17px', fontWeight: 'bold', cursor: 'pointer', whiteSpace: 'nowrap' }}>
             + Nuovo Socio
+          </button>
+          <button onClick={exportCSV}
+            style={{ padding: '14px 30px', background: '#28a745', color: 'white', border: 'none', borderRadius: '10px', fontSize: '17px', fontWeight: 'bold', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+            Esporta CSV
           </button>
         </div>
 
