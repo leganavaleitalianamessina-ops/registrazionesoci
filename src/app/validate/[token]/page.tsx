@@ -70,7 +70,7 @@ export default function ValidatePage() {
       </div>
 
       <div style={{ textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', maxWidth: '500px' }}>
-        <SaveQRCard fileName={`LNI_Messina_QR_${token}`}>
+        <SaveQRCard fileName={`LNI_Messina_QR_${token}`} firstName={userData?.first_name} lastName={userData?.last_name} token={token}>
           <div style={{ textAlign: 'center', padding: '25px' }}>
             <img src="/logo.png" alt="LNI Messina" style={{ height: '70px', width: 'auto', marginBottom: '15px' }} />
             <p style={{ fontSize: '18px', color: '#003366', fontWeight: 'bold', margin: '0 0 20px' }}>

@@ -1,26 +1,64 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
-import html2canvas from 'html2canvas';
+import React, { useState } from 'react';
+import QRCode from 'qrcode';
 
 interface SaveQRCardProps {
   children: React.ReactNode;
   fileName?: string;
+  firstName?: string;
+  lastName?: string;
+  token?: string;
 }
 
-export default function SaveQRCard({ children, fileName = 'LNI_Messina_QR' }: SaveQRCardProps) {
-  const cardRef = useRef<HTMLDivElement>(null);
+export default function SaveQRCard({ children, fileName = 'LNI_Messina_QR', firstName, lastName, token }: SaveQRCardProps) {
   const [saving, setSaving] = useState(false);
 
   const handleSaveImage = async () => {
-    if (!cardRef.current) return;
+    if (!token) return;
     setSaving(true);
     try {
-      const canvas = await html2canvas(cardRef.current, {
-        scale: 2,
-        backgroundColor: '#ffffff',
-        useCORS: true,
+      const size = 400;
+      const padding = 40;
+      const textHeight = 50;
+      const nameHeight = firstName || lastName ? 50 : 0;
+
+      const totalHeight = nameHeight + padding + size + padding + textHeight + padding;
+      const canvas = document.createElement('canvas');
+      canvas.width = size + padding * 2;
+      canvas.height = totalHeight;
+      const ctx = canvas.getContext('2d')!;
+
+      // White background
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw name at top
+      if (firstName || lastName) {
+        ctx.fillStyle = '#003366';
+        ctx.font = 'bold 28px Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`${firstName || ''} ${lastName || ''}`.trim(), canvas.width / 2, nameHeight / 2);
+      }
+
+      // Draw QR code
+      const qrCanvas = document.createElement('canvas');
+      await QRCode.toCanvas(qrCanvas, `${window.location.origin}/validate/${token}`, {
+        width: size,
+        margin: 2,
+        color: { dark: '#003366', light: '#ffffff' },
       });
+      ctx.drawImage(qrCanvas, padding, nameHeight + padding, size, size);
+
+      // Draw token below QR
+      ctx.fillStyle = '#003366';
+      ctx.font = 'bold 24px monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(token, canvas.width / 2, nameHeight + padding + size + padding + textHeight / 2);
+
+      // Download
       const link = document.createElement('a');
       link.download = `${fileName}.png`;
       link.href = canvas.toDataURL('image/png');
@@ -38,7 +76,7 @@ export default function SaveQRCard({ children, fileName = 'LNI_Messina_QR' }: Sa
 
   return (
     <>
-      <div ref={cardRef} style={{ background: '#fff', borderRadius: '20px', overflow: 'hidden' }}>
+      <div style={{ background: '#fff', borderRadius: '20px', overflow: 'hidden' }}>
         {children}
       </div>
       <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '25px', flexWrap: 'wrap' }}>
