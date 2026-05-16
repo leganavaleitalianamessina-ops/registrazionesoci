@@ -13,6 +13,8 @@ interface User {
   phone: string;
   user_type: 'pre_member' | 'active_member';
   status: 'active' | 'expired' | 'revoked';
+  gdpr_consent: boolean;
+  marketing_consent: boolean;
   created_at: string;
   qr_tokens?: { token: string; is_active: boolean; created_at: string }[];
 }
@@ -157,6 +159,8 @@ export default function AdminUsersPage() {
                   <th style={th}>Telefono</th>
                   <th style={th}>Email</th>
                   <th style={th}>Tipo</th>
+                  <th style={th}>GDPR</th>
+                  <th style={th}>Marketing</th>
                   <th style={th}>Azioni</th>
                 </tr>
               </thead>
@@ -169,6 +173,8 @@ export default function AdminUsersPage() {
                     <td style={td}>{u.phone || '-'}</td>
                     <td style={td}>{u.email || '-'}</td>
                     <td style={td}>{u.user_type === 'active_member' ? 'Socio' : 'Pre-Aderente'}</td>
+                    <td style={{ ...td, color: u.gdpr_consent ? '#28a745' : '#dc3545' }}>{u.gdpr_consent ? 'Sì' : 'No'}</td>
+                    <td style={{ ...td, color: u.marketing_consent ? '#28a745' : '#dc3545' }}>{u.marketing_consent ? 'Sì' : 'No'}</td>
                     <td style={td}>
                       <div style={{ display: 'flex', gap: '8px' }}>
                         <button onClick={() => openEdit(u)} style={{ padding: '8px 16px', background: '#ffc107', color: '#333', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '14px' }}>Modifica</button>
