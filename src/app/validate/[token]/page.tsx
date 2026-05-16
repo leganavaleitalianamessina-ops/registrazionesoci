@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import { Loader2, AlertCircle } from 'lucide-react';
 import QRCodeDisplay from '@/components/QRCodeDisplay';
+import SaveQRCard from '@/components/SaveQRCard';
 import { supabase } from '@/lib/supabase';
 
 export default function ValidatePage() {
@@ -68,46 +69,30 @@ export default function ValidatePage() {
         <h2>Il tuo QRCode</h2>
       </div>
 
-      <div style={{ textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
-        <h3 style={{ fontSize: '32px', fontWeight: 'bold', color: '#333', marginBottom: '10px' }}>
-          {userData.first_name} {userData.last_name}
-        </h3>
-        <p style={{ fontSize: '20px', color: '#666', marginBottom: '30px' }}>
-          {userData.user_type === 'pre_member' ? 'Socio Pre-Aderente' : 'Socio Attivo'}
-        </p>
+      <div style={{ textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', maxWidth: '500px' }}>
+        <SaveQRCard fileName={`LNI_Messina_QR_${token}`}>
+          <div style={{ textAlign: 'center', padding: '25px' }}>
+            <img src="/logo.png" alt="LNI Messina" style={{ height: '70px', width: 'auto', marginBottom: '15px' }} />
+            <p style={{ fontSize: '18px', color: '#003366', fontWeight: 'bold', margin: '0 0 20px' }}>
+              Lega Navale Italiana — Sezione di Messina
+            </p>
+            <h3 style={{ fontSize: '32px', fontWeight: 'bold', color: '#333', marginBottom: '10px' }}>
+              {userData.first_name} {userData.last_name}
+            </h3>
+            <p style={{ fontSize: '20px', color: '#666', marginBottom: '25px' }}>
+              {userData.user_type === 'pre_member' ? 'Socio Pre-Aderente' : 'Socio Attivo'}
+            </p>
+            <QRCodeDisplay token={token} size={300} />
+            <p style={{ marginTop: '25px', fontSize: '18px', color: '#888', maxWidth: '300px', marginLeft: 'auto', marginRight: 'auto' }}>
+              Mostra questo codice all'operatore LNI per il check-in.
+            </p>
+          </div>
+        </SaveQRCard>
 
-        <div style={{ padding: '20px', backgroundColor: 'white', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}>
-          <QRCodeDisplay token={token} size={300} />
-        </div>
-
-        <p style={{ marginTop: '30px', fontSize: '18px', color: '#888', maxWidth: '300px' }}>
-          Mostra questo codice all'operatore LNI per effettuare il check-in.
-        </p>
+        <button onClick={() => window.location.href = '/'} className="button-legacy" style={{ backgroundColor: '#6c757d', marginTop: '20px' }}>
+          Torna alla Home
+        </button>
       </div>
-
-      <button 
-        onClick={() => {
-          const canvas = document.querySelector('canvas');
-          if (canvas) {
-            const link = document.createElement('a');
-            link.download = `LNI_Messina_QR_${token}.png`;
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-          }
-        }} 
-        className="button-legacy" 
-        style={{ marginTop: '40px' }}
-      >
-        Salva QRCode sul Telefono
-      </button>
-      
-      <button onClick={() => window.print()} className="button-legacy" style={{ backgroundColor: '#6c757d', marginTop: '10px' }}>
-        Stampa / Salva PDF
-      </button>
-      
-      <button onClick={() => window.location.href = '/'} className="button-legacy" style={{ backgroundColor: '#6c757d', marginTop: '10px' }}>
-        Torna alla Home
-      </button>
 
       <footer style={{ marginTop: '40px', padding: '20px', textAlign: 'center', color: '#aaa' }}>
         &copy; Lega Navale Italiana - Sezione di Messina
