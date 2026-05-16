@@ -1,7 +1,8 @@
-#!/usr/bin/env node
+﻿#!/usr/bin/env node
 
-// Monthly Report Script
+// Monthly Report Script (v2)
 // Genera e invia CSV di utenti e log del mese corrente
+// I destinatari sono letti dalla tabella report_recipients
 // Esecuzione: 1° del mese via GitHub Actions
 
 import { createClient } from '@supabase/supabase-js';
@@ -12,7 +13,6 @@ const SUPABASE_URL = process.env.SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const EMAIL_USER = process.env.EMAIL_USER;
 const EMAIL_PASS = process.env.EMAIL_PASS;
-const REPORT_TO = process.env.REPORT_TO || 'leganavaleitalianamessina@gmail.com';
 
 if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
   console.error('ERRORE: SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY devono essere impostati.');
@@ -45,13 +45,26 @@ async function main() {
   const month = now.toISOString().slice(0, 7);
   console.log(`Mese: ${month}`);
 
+  // Fetch recipients
+  const { data: recipients } = await supabase
+    .from('report_recipients')
+    .select('email')
+    .eq('enabled', true);
+
+  const toList = (recipients || []).map(r => r.email);
+  if (toList.length === 0) {
+    console.log('Nessun destinatario configurato. Nessuna email inviata.');
+    return;
+  }
+  console.log(`Destinatari: ${toList.join(', ')}`);
+
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
   const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString();
 
   // Export users
   const { data: users } = await supabase
     .from('users')
-    .select('id, first_name, last_name, email, phone, user_type, status, gdpr_consent, marketing_consent, registration_date, expiration_date, created_at, updated_at')
+    .select('id, first_name, last_name, date_of_birth, email, phone, user_type, status, gdpr_consent, marketing_consent, registration_date, expiration_date, created_at')
     .order('created_at', { ascending: false });
 
   const usersCSV = toCSV(users || []);
@@ -102,7 +115,7 @@ async function main() {
 
   await transporter.sendMail({
     from: `"LNI Messina Report" <${EMAIL_USER}>`,
-    to: REPORT_TO,
+    to: toList.join(', '),
     subject,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
@@ -120,7 +133,7 @@ async function main() {
           <p style="font-size:14px;color:#888;">I file CSV sono allegati a questa email.</p>
         </div>
       </div>
-    `,
+    ',
     attachments: [
       { filename: `utenti_${month}.csv`, content: usersCSV },
       { filename: `checkin_${month}.csv`, content: checkinsCSV },

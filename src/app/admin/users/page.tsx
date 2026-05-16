@@ -8,12 +8,11 @@ interface User {
   id: string;
   first_name: string;
   last_name: string;
+  date_of_birth: string;
   email: string;
   phone: string;
   user_type: 'pre_member' | 'active_member';
   status: 'active' | 'expired' | 'revoked';
-  gdpr_consent: boolean;
-  marketing_consent: boolean;
   created_at: string;
   qr_tokens?: { token: string; is_active: boolean; created_at: string }[];
 }
@@ -34,11 +33,10 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [tipoFilter, setTipoFilter] = useState<'all' | 'active_member' | 'pre_member'>('all');
   const [showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [formError, setFormError] = useState('');
-  const [form, setForm] = useState({ first_name: '', last_name: '', email: '', phone: '', user_type: 'active_member' as string });
+  const [form, setForm] = useState({ first_name: '', last_name: '', date_of_birth: '', email: '', phone: '', user_type: 'active_member' as string });
 
   const fetchUsers = async () => {
     const res = await apiFetch('/api/admin/users')
@@ -61,7 +59,7 @@ export default function AdminUsersPage() {
     }
     setShowForm(false)
     setEditingUser(null)
-    setForm({ first_name: '', last_name: '', email: '', phone: '', user_type: 'active_member' })
+    setForm({ first_name: '', last_name: '', date_of_birth: '', email: '', phone: '', user_type: 'active_member' })
     fetchUsers()
   }
 
@@ -72,16 +70,13 @@ export default function AdminUsersPage() {
   }
 
   const openEdit = (u: User) => {
-    setForm({ first_name: u.first_name, last_name: u.last_name, email: u.email, phone: u.phone || '', user_type: u.user_type })
+    setForm({ first_name: u.first_name, last_name: u.last_name, date_of_birth: u.date_of_birth?.split('T')[0] || '', email: u.email, phone: u.phone || '', user_type: u.user_type })
     setEditingUser(u)
     setShowForm(true)
   }
 
-  const statusColor = (s: string) => s === 'active' ? '#28a745' : s === 'expired' ? '#ffc107' : '#dc3545'
   const filtered = users.filter(u => {
-    const matchSearch = `${u.first_name} ${u.last_name} ${u.email}`.toLowerCase().includes(search.toLowerCase());
-    const matchTipo = tipoFilter === 'all' || u.user_type === tipoFilter;
-    return matchSearch && matchTipo;
+    return `${u.first_name} ${u.last_name} ${u.phone || ''}`.toLowerCase().includes(search.toLowerCase());
   })
 
   if (loading) return <div style={{ textAlign: 'center', fontSize: '24px', padding: '60px', background: '#f0f2f5', minHeight: '100vh', fontFamily: 'Arial, sans-serif' }}>Caricamento...</div>
@@ -92,25 +87,9 @@ export default function AdminUsersPage() {
 
       <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
         <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
-          <input placeholder="Cerca nome, cognome o email..." value={search} onChange={e => setSearch(e.target.value)}
+          <input placeholder="Cerca nome, cognome o telefono..." value={search} onChange={e => setSearch(e.target.value)}
             style={{ flex: 1, minWidth: '200px', padding: '14px 18px', border: '2px solid #ddd', borderRadius: '10px', fontSize: '17px' }} />
-          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-            {(['all', 'active_member', 'pre_member'] as const).map(t => {
-              const label = t === 'all' ? 'Tutti' : t === 'active_member' ? 'Soci Attivi' : 'Pre-Aderenti';
-              const active = tipoFilter === t;
-              return (
-                <button key={t} onClick={() => setTipoFilter(t)}
-                  style={{
-                    padding: '10px 18px', border: '2px solid', borderRadius: '8px', fontSize: '15px', cursor: 'pointer',
-                    background: active ? '#003366' : 'white', color: active ? 'white' : '#003366',
-                    borderColor: '#003366', fontWeight: active ? 'bold' : 'normal',
-                  }}>
-                  {label}
-                </button>
-              );
-            })}
-          </div>
-          <button onClick={() => { setEditingUser(null); setForm({ first_name: '', last_name: '', email: '', phone: '', user_type: 'active_member' }); setShowForm(true) }}
+          <button onClick={() => { setEditingUser(null); setForm({ first_name: '', last_name: '', date_of_birth: '', email: '', phone: '', user_type: 'active_member' }); setShowForm(true) }}
             style={{ padding: '14px 30px', background: '#007bff', color: 'white', border: 'none', borderRadius: '10px', fontSize: '17px', fontWeight: 'bold', cursor: 'pointer', whiteSpace: 'nowrap' }}>
             + Nuovo Socio
           </button>
@@ -123,6 +102,7 @@ export default function AdminUsersPage() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
               <input required placeholder="Nome" value={form.first_name} onChange={e => setForm(p => ({ ...p, first_name: e.target.value }))} style={inputStyle} />
               <input required placeholder="Cognome" value={form.last_name} onChange={e => setForm(p => ({ ...p, last_name: e.target.value }))} style={inputStyle} />
+              <input type="date" placeholder="Data di Nascita" value={form.date_of_birth} onChange={e => setForm(p => ({ ...p, date_of_birth: e.target.value }))} style={inputStyle} />
               <input type="email" placeholder="Email (opzionale)" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} style={inputStyle} />
               <input placeholder="Telefono" value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} style={inputStyle} />
               <select value={form.user_type} onChange={e => setForm(p => ({ ...p, user_type: e.target.value }))} style={inputStyle}>
@@ -149,30 +129,24 @@ export default function AdminUsersPage() {
             <table style={{ width: '100%', borderCollapse: 'collapse', background: 'white', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
               <thead>
                 <tr style={{ background: '#003366', color: 'white' }}>
+                  <th style={th}>Data</th>
                   <th style={th}>Nome</th>
-                  <th style={th}>Email</th>
+                  <th style={th}>Data Nascita</th>
                   <th style={th}>Telefono</th>
+                  <th style={th}>Email</th>
                   <th style={th}>Tipo</th>
-                  <th style={th}>Stato</th>
-                  <th style={th}>QR Token</th>
                   <th style={th}>Azioni</th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.map(u => (
                   <tr key={u.id} style={{ borderBottom: '1px solid #eee' }}>
+                    <td style={td}>{new Date(u.created_at).toLocaleDateString('it-IT')}</td>
                     <td style={td}>{u.first_name} {u.last_name}</td>
-                    <td style={td}>{u.email}</td>
+                    <td style={td}>{u.date_of_birth ? new Date(u.date_of_birth).toLocaleDateString('it-IT') : '-'}</td>
                     <td style={td}>{u.phone || '-'}</td>
+                    <td style={td}>{u.email || '-'}</td>
                     <td style={td}>{u.user_type === 'active_member' ? 'Socio' : 'Pre-Aderente'}</td>
-                    <td style={td}><span style={{ background: statusColor(u.status), color: 'white', padding: '4px 12px', borderRadius: '20px', fontSize: '14px' }}>{u.status}</span></td>
-                    <td style={td}>
-                      {u.qr_tokens?.filter(t => t.is_active).length ? (
-                        <span style={{ fontFamily: 'monospace', fontSize: '14px', color: '#003366' }}>
-                          {u.qr_tokens.find(t => t.is_active)?.token}
-                        </span>
-                      ) : <span style={{ color: '#999' }}>Nessuno</span>}
-                    </td>
                     <td style={td}>
                       <div style={{ display: 'flex', gap: '8px' }}>
                         <button onClick={() => openEdit(u)} style={{ padding: '8px 16px', background: '#ffc107', color: '#333', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '14px' }}>Modifica</button>

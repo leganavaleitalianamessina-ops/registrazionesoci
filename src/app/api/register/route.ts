@@ -15,7 +15,7 @@ function getClientIp(req: NextRequest): string {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { firstName, lastName, phone, gdprConsent, marketingConsent, website, elapsed } = body;
+    const { firstName, lastName, dateOfBirth, phone, gdprConsent, marketingConsent, website, elapsed } = body;
 
     // Honeypot: if invisible field is filled, it's a bot
     if (website) {
@@ -46,11 +46,14 @@ export async function POST(req: NextRequest) {
 
     const ip = getClientIp(req);
 
+    const cleanDob = dateOfBirth || null;
+
     const { data: userData, error: userError } = await supabase
       .from('users')
       .insert({
         first_name: cleanFirstName,
         last_name: cleanLastName,
+        date_of_birth: cleanDob,
         email: null,
         phone: cleanPhone,
         user_type: 'pre_member',

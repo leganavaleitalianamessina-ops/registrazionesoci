@@ -45,7 +45,7 @@ export async function POST(req: Request) {
 
   const supabase = createAuthClient(token)
   const body = await req.json()
-  const { first_name, last_name, email, phone, user_type, gdpr_consent, marketing_consent } = body
+  const { first_name, last_name, date_of_birth, email, phone, user_type, gdpr_consent, marketing_consent } = body
 
   // Check duplicate phone
   if (phone) {
@@ -60,7 +60,7 @@ export async function POST(req: Request) {
   const { data: userData, error: userError } = await supabase
     .from('users')
     .insert({
-      first_name, last_name, email: userData_email, phone,
+      first_name, last_name, date_of_birth: date_of_birth || null, email: userData_email, phone,
       user_type: user_type || 'active_member',
       status: 'active',
       gdpr_consent: gdpr_consent || false,

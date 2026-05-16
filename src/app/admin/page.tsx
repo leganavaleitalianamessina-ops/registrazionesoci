@@ -8,7 +8,7 @@ import LicenseFooter from '@/components/LicenseFooter';
 export default function AdminDashboard() {
   const router = useRouter();
   const [adminRole, setAdminRole] = useState<string | null>(null);
-  const [stats, setStats] = useState({ users: 0, activeMembers: 0, preMembers: 0, activeQr: 0, todayCheckins: 0 });
+  const [stats, setStats] = useState({ total: 0, today: 0, week: 0, month: 0 });
   const [weeklyReport, setWeeklyReport] = useState(true);
   const [ready, setReady] = useState(false);
 
@@ -35,18 +35,14 @@ export default function AdminDashboard() {
       } catch {}
 
       const today = new Date().toISOString().split('T')[0]
+      const weekStart = new Date(); weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1); weekStart.setHours(0,0,0,0)
+      const monthStart = new Date(); monthStart.setDate(1); monthStart.setHours(0,0,0,0)
       const { count: u } = await supabase.from('users').select('*', { count: 'exact', head: true })
-      const { count: am } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('user_type', 'active_member')
-      const { count: pm } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('user_type', 'pre_member')
-      const { count: q } = await supabase.from('qr_tokens').select('*', { count: 'exact', head: true }).eq('is_active', true)
-      const { count: c } = await supabase
-        .from('checkin_logs')
-        .select('*', { count: 'exact', head: true })
-        .in('checkin_result', ['SUCCESS', 'EXPIRED', 'REVOKED', 'NOT_FOUND'])
-        .gte('created_at', `${today}T00:00:00.000Z`)
-        .lte('created_at', `${today}T23:59:59.999Z`)
+      const { count: cToday } = await supabase.from('users').select('*', { count: 'exact', head: true }).gte('created_at', `${today}T00:00:00.000Z`).lte('created_at', `${today}T23:59:59.999Z`)
+      const { count: cWeek } = await supabase.from('users').select('*', { count: 'exact', head: true }).gte('created_at', weekStart.toISOString())
+      const { count: cMonth } = await supabase.from('users').select('*', { count: 'exact', head: true }).gte('created_at', monthStart.toISOString())
 
-      setStats({ users: u || 0, activeMembers: am || 0, preMembers: pm || 0, activeQr: q || 0, todayCheckins: c || 0 })
+      setStats({ total: u || 0, today: cToday || 0, week: cWeek || 0, month: cMonth || 0 })
       setReady(true)
     })()
   }, [])
@@ -74,15 +70,16 @@ export default function AdminDashboard() {
       <Header onLogout={handleLogout} />
       <div style={{ padding: '20px', maxWidth: '1000px', margin: '0 auto' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '30px' }}>
-          <Card value={stats.users} label="Utenti Totali" color="#007bff" />
-          <Card value={stats.activeMembers} label="Soci Attivi" color="#28a745" />
-          <Card value={stats.preMembers} label="Aspiranti Soci" color="#ffc107" />
-          <Card value={stats.activeQr} label="QR Attivi" color="#6f42c1" />
-          <Card value={stats.todayCheckins} label="Check-in Oggi" color="#dc3545" />
+          <Card value={stats.total} label="Utenti Registrati" color="#007bff" />
+          <Card value={stats.today} label="Oggi" color="#28a745" />
+          <Card value={stats.week} label="Questa Settimana" color="#ffc107" />
+          <Card value={stats.month} label="Questo Mese" color="#dc3545" />
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <NavButton label="Gestione Utenti" desc="Aggiungi, modifica o elimina soci e pre-aderenti" onClick={() => router.push('/admin/users')} color="#007bff" />
-          <NavButton label="Visualizza Ingressi" desc="Controlla i check-in per data con riepilogo giornaliero e mensile" onClick={() => router.push('/admin/checkins')} color="#28a745" />
+          {adminRole === 'admin_full' && (
+            <NavButton label="Destinatari Report" desc="Gestisci gli indirizzi email per ricevere report e dashboard" onClick={() => router.push('/admin/recipients')} color="#6f42c1" />
+          )}
           {adminRole === 'admin_full' && (
             <NavButton label="Registrazione Pubblica" desc="Torna al modulo di pre-iscrizione pubblico" onClick={() => window.open('/register', '_blank')} color="#6c757d" />
           )}

@@ -14,10 +14,11 @@ export default function RegisterPage() {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
+    dateOfBirth: '',
     phone: '',
     website: '',
-    gdprConsent: false,
-    marketingConsent: false,
+    gdprConsent: true,
+    marketingConsent: true,
   });
 
   const [qrToken, setQrToken] = useState<string | null>(null);
@@ -46,6 +47,7 @@ export default function RegisterPage() {
         body: JSON.stringify({
           firstName: cleanFirstName,
           lastName: cleanLastName,
+          dateOfBirth: formData.dateOfBirth || null,
           phone: formData.phone.trim(),
           gdprConsent: formData.gdprConsent,
           marketingConsent: formData.marketingConsent,
@@ -132,6 +134,9 @@ export default function RegisterPage() {
 
         <label className="label-legacy">Cognome *</label>
         <input required name="lastName" value={formData.lastName} onChange={handleChange} className="input-legacy" />
+
+        <label className="label-legacy">Data di Nascita *</label>
+        <input required type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} className="input-legacy" />
 
         <label className="label-legacy">Telefono *</label>
         <input required type="tel" name="phone" pattern="[0-9]{9,15}" value={formData.phone} onChange={handleChange} className="input-legacy" />
