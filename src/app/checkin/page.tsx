@@ -65,7 +65,7 @@ export default function CheckinPage() {
 
           if (error || !data) {
             playSound(false);
-            setScanResult({ success: false, message: "NON VALIDO", sub: "Codice non trovato" });
+            setScanResult({ success: false, message: "QR CODE", sub: "NON RICONOSCIUTO" });
             await logCheckin(null, 'NOT_FOUND');
           } else {
             const user = data.users;
