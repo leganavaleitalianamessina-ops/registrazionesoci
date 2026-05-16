@@ -27,46 +27,7 @@ const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
   realtime: { transport: ws },
 });
 
-// ─── CF CALCULATION ───────────────────────────────────────────
-const MONTH_CODES = ['A','B','C','D','E','H','L','M','P','R','S','T'];
-const CF_EVEN = { '0':0,'1':1,'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'A':0,'B':1,'C':2,'D':3,'E':4,'F':5,'G':6,'H':7,'I':8,'J':9,'K':10,'L':11,'M':12,'N':13,'O':14,'P':15,'Q':16,'R':17,'S':18,'T':19,'U':20,'V':21,'W':22,'X':23,'Y':24,'Z':25 };
-const CF_ODD = { '0':1,'1':0,'2':5,'3':7,'4':9,'5':13,'6':15,'7':17,'8':19,'9':21,'A':1,'B':0,'C':5,'D':7,'E':9,'F':13,'G':15,'H':17,'I':19,'J':21,'K':2,'L':4,'M':18,'N':20,'O':11,'P':3,'Q':6,'R':8,'S':12,'T':14,'U':16,'V':10,'W':22,'X':25,'Y':24,'Z':23 };
 
-function extractChars(str, isSurname) {
-  const upper = str.toUpperCase().replace(/[^A-Z]/g, '');
-  let cons = ''; let vows = '';
-  for (const c of upper) {
-    if ('AEIOU'.includes(c)) vows += c; else cons += c;
-  }
-  if (isSurname) {
-    return (cons + vows + 'XXX').slice(0, 3);
-  } else {
-    if (cons.length >= 4) return (cons.slice(1, 4) + 'XXX').slice(0, 3);
-    else return (cons + vows + 'XXX').slice(0, 3);
-  }
-}
-
-function calcCF(lastName, firstName, dateStr) {
-  if (!lastName || !firstName || !dateStr) return '';
-  const date = new Date(dateStr);
-  if (isNaN(date.getTime())) return '';
-  const surname = extractChars(lastName, true);
-  const name = extractChars(firstName, false);
-  const year = String(date.getFullYear()).slice(-2);
-  const month = MONTH_CODES[date.getMonth()];
-  const day = String(date.getDate()).padStart(2, '0');
-  const base = surname + name + year + month + day + 'XXXXX';
-
-  let sum = 0;
-  for (let i = 0; i < base.length; i++) {
-    const c = base[i];
-    if (i % 2 === 0) sum += (CF_ODD[c] !== undefined ? CF_ODD[c] : 0);
-    else sum += (CF_EVEN[c] !== undefined ? CF_EVEN[c] : 0);
-  }
-
-  const check = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[sum % 26];
-  return base + check;
-}
 
 function toCSV(rows) {
   if (!rows || rows.length === 0) return 'Nessun dato';
@@ -147,7 +108,6 @@ async function main() {
     Nome: u.first_name || '',
     Cognome: u.last_name || '',
     Data_di_Nascita: u.date_of_birth ? u.date_of_birth.slice(0, 10) : '',
-    Codice_Fiscale: calcCF(u.last_name, u.first_name, u.date_of_birth),
     Telefono: u.phone || '',
     Email: u.email || '',
   }));
@@ -180,8 +140,7 @@ async function main() {
             <tr><td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Questa Settimana</td><td style="padding:10px;border:1px solid #ddd;text-align:center;font-size:24px;color:#ffc107;">${week || 0}</td></tr>
             <tr><td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Questo Mese</td><td style="padding:10px;border:1px solid #ddd;text-align:center;font-size:24px;color:#dc3545;">${month || 0}</td></tr>
           </table>
-          <p style="font-size:14px;color:#888;margin-top:20px;">In allegato l\'elenco degli aspiranti soci con Codice Fiscale calcolato.</p>
-          <p style="font-size:12px;color:#aaa;">Nota: il Codice Fiscale è calcolato automaticamente senza il luogo di nascita (placeholder XXXXX). Potrebbero essere necessarie verifiche.</p>
+          <p style="font-size:14px;color:#888;margin-top:20px;">In allegato l\'elenco degli aspiranti soci.</p>
         </div>
         <div style="background-color:#f4f4f4;padding:20px;text-align:center;font-size:12px;color:#888;">
           &copy; ${new Date().getFullYear()} Lega Navale Italiana - Sezione di Messina<br>
