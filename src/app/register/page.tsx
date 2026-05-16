@@ -32,6 +32,13 @@ export default function RegisterPage() {
     }));
   };
 
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/\D/g, '').slice(0, 8);
+    if (val.length > 2) val = val.slice(0, 2) + '/' + val.slice(2);
+    if (val.length > 5) val = val.slice(0, 5) + '/' + val.slice(5);
+    setFormData((prev) => ({ ...prev, dateOfBirth: val }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -47,7 +54,7 @@ export default function RegisterPage() {
         body: JSON.stringify({
           firstName: cleanFirstName,
           lastName: cleanLastName,
-          dateOfBirth: formData.dateOfBirth || null,
+          dateOfBirth: formData.dateOfBirth ? formData.dateOfBirth.split('/').reverse().join('-') : null,
           phone: formData.phone.trim(),
           gdprConsent: formData.gdprConsent,
           marketingConsent: formData.marketingConsent,
@@ -136,7 +143,7 @@ export default function RegisterPage() {
         <input required name="lastName" value={formData.lastName} onChange={handleChange} className="input-legacy" />
 
         <label className="label-legacy">Data di Nascita *</label>
-        <input required type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} className="input-legacy" />
+        <input required type="text" name="dateOfBirth" inputMode="numeric" placeholder="DD/MM/AAAA" value={formData.dateOfBirth} onChange={handleDateChange} className="input-legacy" />
 
         <label className="label-legacy">Telefono *</label>
         <input required type="tel" name="phone" pattern="[0-9]{9,15}" value={formData.phone} onChange={handleChange} className="input-legacy" />
