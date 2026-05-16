@@ -29,12 +29,12 @@ export async function GET(req: Request) {
   const supabase = createAuthClient(token)
   const { data: users, error } = await supabase
     .from('users')
-    .select('first_name, last_name, date_of_birth, email, phone, user_type, status, created_at')
+    .select('first_name, last_name, date_of_birth, email, phone, user_type, status, gdpr_consent, marketing_consent, created_at')
     .order('created_at', { ascending: false })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  const headers = ['Nome', 'Cognome', 'Data_di_Nascita', 'Email', 'Telefono', 'Tipo', 'Stato', 'Data_Registrazione']
+  const headers = ['Nome', 'Cognome', 'Data_di_Nascita', 'Email', 'Telefono', 'Tipo', 'Stato', 'Consenso_GDPR', 'Consenso_Marketing', 'Data_Registrazione']
   const rows = (users || []).map(u => [
     u.first_name || '',
     u.last_name || '',
@@ -43,6 +43,8 @@ export async function GET(req: Request) {
     u.phone || '',
     u.user_type === 'active_member' ? 'Socio Attivo' : 'Pre-Aderente',
     u.status || '',
+    u.gdpr_consent ? 'Sì' : 'No',
+    u.marketing_consent ? 'Sì' : 'No',
     u.created_at ? u.created_at.slice(0, 10) : '',
   ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
 

@@ -67,8 +67,12 @@ async function main() {
     .select('id, first_name, last_name, date_of_birth, email, phone, user_type, status, gdpr_consent, marketing_consent, registration_date, expiration_date, created_at')
     .order('created_at', { ascending: false });
 
-  const usersCSV = toCSV(users || []);
-  console.log(`Utenti esportati: ${(users || []).length}`);
+  const usersArr = users || [];
+  const usersCSV = toCSV(usersArr);
+  console.log(`Utenti esportati: ${usersArr.length}`);
+
+  const gdprCount = usersArr.filter(u => u.gdpr_consent).length;
+  const marketingCount = usersArr.filter(u => u.marketing_consent).length;
 
   // Export checkin logs for current month
   const { data: checkins } = await supabase
@@ -129,6 +133,11 @@ async function main() {
             <li><strong>${users?.length || 0}</strong> utenti totali</li>
             <li><strong>${checkinRows.length}</strong> check-in</li>
             <li><strong>${(attempts || []).length}</strong> tentativi di login</li>
+          </ul>
+          <h3 style="color:#333;margin-top:20px;">Consensi</h3>
+          <ul>
+            <li><strong>${gdprCount}</strong> consenso GDPR</li>
+            <li><strong>${marketingCount}</strong> consenso Marketing</li>
           </ul>
           <p style="font-size:14px;color:#888;">I file CSV sono allegati a questa email.</p>
         </div>

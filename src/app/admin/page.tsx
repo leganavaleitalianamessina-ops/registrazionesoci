@@ -8,7 +8,7 @@ import LicenseFooter from '@/components/LicenseFooter';
 export default function AdminDashboard() {
   const router = useRouter();
   const [adminRole, setAdminRole] = useState<string | null>(null);
-  const [stats, setStats] = useState({ total: 0, today: 0, week: 0, month: 0 });
+  const [stats, setStats] = useState({ total: 0, today: 0, week: 0, month: 0, gdpr: 0, marketing: 0 });
   const [weeklyReport, setWeeklyReport] = useState(true);
   const [ready, setReady] = useState(false);
 
@@ -41,8 +41,10 @@ export default function AdminDashboard() {
       const { count: cToday } = await supabase.from('users').select('*', { count: 'exact', head: true }).gte('created_at', `${today}T00:00:00.000Z`).lte('created_at', `${today}T23:59:59.999Z`)
       const { count: cWeek } = await supabase.from('users').select('*', { count: 'exact', head: true }).gte('created_at', weekStart.toISOString())
       const { count: cMonth } = await supabase.from('users').select('*', { count: 'exact', head: true }).gte('created_at', monthStart.toISOString())
+      const { count: gdpr } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('gdpr_consent', true)
+      const { count: marketing } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('marketing_consent', true)
 
-      setStats({ total: u || 0, today: cToday || 0, week: cWeek || 0, month: cMonth || 0 })
+      setStats({ total: u || 0, today: cToday || 0, week: cWeek || 0, month: cMonth || 0, gdpr: gdpr || 0, marketing: marketing || 0 })
       setReady(true)
     })()
   }, [])
@@ -74,6 +76,8 @@ export default function AdminDashboard() {
           <Card value={stats.today} label="Oggi" color="#28a745" />
           <Card value={stats.week} label="Questa Settimana" color="#ffc107" />
           <Card value={stats.month} label="Questo Mese" color="#dc3545" />
+          <Card value={stats.gdpr} label="Consenso GDPR" color="#17a2b8" />
+          <Card value={stats.marketing} label="Consenso Marketing" color="#6610f2" />
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <NavButton label="Gestione Utenti" desc="Aggiungi, modifica o elimina soci e pre-aderenti" onClick={() => router.push('/admin/users')} color="#007bff" />

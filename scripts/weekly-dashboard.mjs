@@ -96,11 +96,13 @@ async function main() {
     .gte('created_at', weekStart);
   const { count: month } = await supabase.from('users').select('*', { count: 'exact', head: true })
     .gte('created_at', new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString());
+  const { count: gdpr } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('gdpr_consent', true);
+  const { count: marketing } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('marketing_consent', true);
 
-  // Export pre-members CSV with CF
+  // Export pre-members CSV
   const { data: preMembers } = await supabase
     .from('users')
-    .select('first_name, last_name, date_of_birth, phone, email, created_at')
+    .select('first_name, last_name, date_of_birth, phone, email, created_at, gdpr_consent, marketing_consent')
     .eq('user_type', 'pre_member')
     .order('created_at', { ascending: false });
 
@@ -110,6 +112,8 @@ async function main() {
     Data_di_Nascita: u.date_of_birth ? u.date_of_birth.slice(0, 10) : '',
     Telefono: u.phone || '',
     Email: u.email || '',
+    Consenso_GDPR: u.gdpr_consent ? 'Sì' : 'No',
+    Consenso_Marketing: u.marketing_consent ? 'Sì' : 'No',
   }));
   const csvContent = toCSV(csvRows);
   console.log(`Aspiranti soci esportati: ${csvRows.length}`);
@@ -139,6 +143,11 @@ async function main() {
             <tr><td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Oggi</td><td style="padding:10px;border:1px solid #ddd;text-align:center;font-size:24px;color:#28a745;">${today || 0}</td></tr>
             <tr><td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Questa Settimana</td><td style="padding:10px;border:1px solid #ddd;text-align:center;font-size:24px;color:#ffc107;">${week || 0}</td></tr>
             <tr><td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Questo Mese</td><td style="padding:10px;border:1px solid #ddd;text-align:center;font-size:24px;color:#dc3545;">${month || 0}</td></tr>
+          </table>
+          <h2 style="color:#333;border-bottom:2px solid #003366;padding-bottom:10px;margin-top:25px;">Consensi</h2>
+          <table style="width:100%;border-collapse:collapse;margin:15px 0;">
+            <tr><td style="padding:10px;border:1px solid #ddd;font-weight:bold;">GDPR</td><td style="padding:10px;border:1px solid #ddd;text-align:center;font-size:24px;color:#17a2b8;">${gdpr || 0}</td></tr>
+            <tr><td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Marketing</td><td style="padding:10px;border:1px solid #ddd;text-align:center;font-size:24px;color:#6610f2;">${marketing || 0}</td></tr>
           </table>
           <p style="font-size:14px;color:#888;margin-top:20px;">In allegato l\'elenco degli aspiranti soci.</p>
         </div>
