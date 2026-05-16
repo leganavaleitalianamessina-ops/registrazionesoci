@@ -4,7 +4,6 @@ import React, { useRef, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import QRCodeDisplay from '@/components/QRCodeDisplay';
-import SaveQRCard from '@/components/SaveQRCard';
 
 export default function RegisterPage() {
   const formLoadedAt = useRef(Date.now());
@@ -24,8 +23,6 @@ export default function RegisterPage() {
 
   const [qrToken, setQrToken] = useState<string | null>(null);
   const [qrPhone, setQrPhone] = useState<string | null>(null);
-  const [qrFirstName, setQrFirstName] = useState('');
-  const [qrLastName, setQrLastName] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -74,8 +71,6 @@ export default function RegisterPage() {
 
       setQrToken(data.token);
       setQrPhone(data.phone);
-      setQrFirstName(data.firstName || cleanFirstName);
-      setQrLastName(data.lastName || cleanLastName);
       setSuccess(true);
     } catch (err: any) {
       setError(err.message || 'Errore di comunicazione. Riprova.');
@@ -94,26 +89,23 @@ export default function RegisterPage() {
           <h2>Iscrizione Completata!</h2>
         </div>
         <div style={{ textAlign: 'center', padding: '20px', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-          <SaveQRCard fileName={`LNI_Messina_QR_${qrToken}`} firstName={qrFirstName} lastName={qrLastName} token={qrToken || ''}>
-            <div style={{ textAlign: 'center', padding: '25px' }}>
-              <img src="/logo.png" alt="LNI Messina" style={{ height: '60px', width: 'auto', marginBottom: '15px' }} />
-              <p style={{ fontSize: '18px', color: '#003366', fontWeight: 'bold', margin: '0 0 20px' }}>
-                Lega Navale Italiana — Sezione di Messina
-              </p>
-              <QRCodeDisplay token={qrToken || ''} size={260} />
-              <p style={{ fontSize: '18px', color: '#666', marginTop: '20px', lineHeight: '1.5' }}>
-                Il tuo codice personale:<br />
-                <strong style={{ fontSize: '28px', color: '#003366', letterSpacing: '3px' }}>{qrToken}</strong>
-              </p>
-              <p style={{ fontSize: '18px', color: '#666', marginTop: '20px', lineHeight: '1.5' }}>
-                Mostra questo QR code all&apos;operatore per il check-in.
-              </p>
-              {qrPhone && <p style={{ fontSize: '14px', color: '#aaa', marginTop: '10px' }}>
-                Puoi recuperare il QR code inserendo il numero <strong>{qrPhone}</strong> nella pagina Recupera QR.
-              </p>}
-            </div>
-          </SaveQRCard>
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '20px', flexWrap: 'wrap' }}>
+          <div style={{
+            padding: '20px', backgroundColor: 'white', borderRadius: '20px',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.1)', display: 'inline-block', marginTop: '10px'
+          }}>
+            <QRCodeDisplay token={qrToken || ''} size={260} />
+          </div>
+          <p style={{ fontSize: '18px', color: '#666', marginTop: '20px', lineHeight: '1.5' }}>
+            Il tuo codice personale:<br />
+            <strong style={{ fontSize: '28px', color: '#003366', letterSpacing: '3px' }}>{qrToken}</strong>
+          </p>
+          <p style={{ fontSize: '18px', color: '#666', marginTop: '20px', lineHeight: '1.5' }}>
+            Mostra questo QR code all&apos;operatore per il check-in.
+          </p>
+          {qrPhone && <p style={{ fontSize: '14px', color: '#aaa', marginTop: '10px' }}>
+            Puoi recuperare il QR code in qualsiasi momento inserendo il numero <strong>{qrPhone}</strong> nella pagina Recupera QR.
+          </p>}
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '30px', flexWrap: 'wrap' }}>
             <button onClick={() => window.open(`/validate/${qrToken}`, '_blank')} className="button-legacy">
               Visualizza QR Code
             </button>
@@ -121,6 +113,9 @@ export default function RegisterPage() {
               Torna alla Home
             </button>
           </div>
+          <p style={{ fontSize: '14px', color: '#aaa', marginTop: '30px' }}>
+            Puoi recuperare il QR code in qualsiasi momento dalla home page.
+          </p>
         </div>
       </div>
     );
