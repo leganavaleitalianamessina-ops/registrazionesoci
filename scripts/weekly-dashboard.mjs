@@ -114,6 +114,19 @@ async function main() {
   }
   console.log(`Destinatari: ${toList.join(', ')}`);
 
+  // Check if weekly report is enabled in app_settings
+  const { data: setting } = await supabase
+    .from('app_settings')
+    .select('value')
+    .eq('key', 'weekly_report_enabled')
+    .single();
+
+  const isEnabled = setting?.value === true || setting?.value === 'true';
+  if (!isEnabled) {
+    console.log('Report settimanale disabilitato da app_settings. Nessuna email inviata.');
+    return;
+  }
+
   // Fetch stats — solo conteggi registrazioni
   const { count: totalUsers } = await supabase.from('users').select('*', { count: 'exact', head: true });
   const { count: today } = await supabase.from('users').select('*', { count: 'exact', head: true })
@@ -175,13 +188,23 @@ async function main() {
           Report settimanale automatico.
         </div>
       </div>
-    ',
+    `,
     attachments: [
       { filename: `aspiranti_soci_${new Date().toISOString().slice(0, 10)}.csv`, content: csvContent },
     ],
   });
 
   console.log('Email dashboard settimanale inviata con successo.');
+
+  // Log to audit_logs
+  try {
+    await supabase.from('audit_logs').insert({
+      action_type: 'WEEKLY_REPORT',
+      target_type: 'export',
+      metadata: { week: weekLabel, total_users: totalUsers, week_users: week, pre_members_exported: csvRows.length, recipients: toList },
+    });
+  } catch {}
+
   console.log('=== FINE ===');
 }
 

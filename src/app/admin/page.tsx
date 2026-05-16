@@ -89,7 +89,7 @@ export default function AdminDashboard() {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
                 <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#333' }}>Report Settimanale Email</div>
-                <div style={{ fontSize: '14px', color: '#888', marginTop: '4px' }}>Invia ogni lunedì le statistiche a leganavaleitalianamessina@gmail.com</div>
+                <div style={{ fontSize: '14px', color: '#888', marginTop: '4px' }}>Invia ogni lunedì le statistiche ai destinatari configurati</div>
               </div>
               <button onClick={toggleWeeklyReport} style={{
                 width: '60px', height: '32px', borderRadius: '16px', border: 'none', cursor: 'pointer',

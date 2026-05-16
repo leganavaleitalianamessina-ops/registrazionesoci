@@ -1,12 +1,10 @@
-import { createClient } from '@supabase/supabase-js';
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-);
-
 export async function GET() {
+  const supabase = createRouteHandlerClient({ cookies });
+
   const { data, error } = await supabase
     .from('app_settings')
     .select('value')
@@ -22,6 +20,7 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
+    const supabase = createRouteHandlerClient({ cookies });
     const { enabled } = await req.json();
 
     if (typeof enabled !== 'boolean') {

@@ -133,7 +133,7 @@ async function main() {
           <p style="font-size:14px;color:#888;">I file CSV sono allegati a questa email.</p>
         </div>
       </div>
-    ',
+    `,
     attachments: [
       { filename: `utenti_${month}.csv`, content: usersCSV },
       { filename: `checkin_${month}.csv`, content: checkinsCSV },
