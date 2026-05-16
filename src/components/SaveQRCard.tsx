@@ -22,8 +22,9 @@ export default function SaveQRCard({ children, fileName = 'LNI_Messina_QR', firs
       const padding = 40;
       const textHeight = 50;
       const nameHeight = firstName || lastName ? 50 : 0;
+      const subHeight = 35;
 
-      const totalHeight = nameHeight + padding + size + padding + textHeight + padding;
+      const totalHeight = nameHeight + subHeight + padding + size + padding + textHeight + padding;
       const canvas = document.createElement('canvas');
       canvas.width = size + padding * 2;
       canvas.height = totalHeight;
@@ -32,13 +33,22 @@ export default function SaveQRCard({ children, fileName = 'LNI_Messina_QR', firs
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+      let yOffset = 0;
       if (firstName || lastName) {
         ctx.fillStyle = '#003366';
         ctx.font = 'bold 28px Arial, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(`${firstName || ''} ${lastName || ''}`.trim(), canvas.width / 2, nameHeight / 2);
+        yOffset = nameHeight;
       }
+
+      ctx.fillStyle = '#555';
+      ctx.font = '20px Arial, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('Registrazione a LNI Messina', canvas.width / 2, yOffset + subHeight / 2);
+      yOffset += subHeight;
 
       const qrCanvas = document.createElement('canvas');
       await QRCode.toCanvas(qrCanvas, `${window.location.origin}/validate/${token}`, {
@@ -46,13 +56,13 @@ export default function SaveQRCard({ children, fileName = 'LNI_Messina_QR', firs
         margin: 2,
         color: { dark: '#003366', light: '#ffffff' },
       });
-      ctx.drawImage(qrCanvas, padding, nameHeight + padding, size, size);
+      ctx.drawImage(qrCanvas, padding, yOffset + padding, size, size);
 
       ctx.fillStyle = '#003366';
       ctx.font = 'bold 24px monospace';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(token, canvas.width / 2, nameHeight + padding + size + padding + textHeight / 2);
+      ctx.fillText(token, canvas.width / 2, yOffset + padding + size + padding + textHeight / 2);
 
       const link = document.createElement('a');
       link.download = `${fileName}.png`;

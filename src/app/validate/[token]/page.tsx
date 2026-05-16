@@ -83,9 +83,6 @@ export default function ValidatePage() {
               {userData.user_type === 'pre_member' ? 'Socio Pre-Aderente' : 'Socio Attivo'}
             </p>
             <QRCodeDisplay token={token} size={300} />
-            <p style={{ marginTop: '25px', fontSize: '18px', color: '#888', maxWidth: '300px', marginLeft: 'auto', marginRight: 'auto' }}>
-              Mostra questo codice all'operatore LNI per il check-in.
-            </p>
           </div>
         </SaveQRCard>
 

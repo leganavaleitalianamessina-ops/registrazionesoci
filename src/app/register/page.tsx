@@ -121,9 +121,6 @@ export default function RegisterPage() {
                 Il tuo codice personale:<br />
                 <strong style={{ fontSize: '28px', color: '#003366', letterSpacing: '3px' }}>{qrToken}</strong>
               </p>
-              <p style={{ fontSize: '18px', color: '#666', marginTop: '20px', lineHeight: '1.5' }}>
-                Mostra questo QR code all&apos;operatore per il check-in.
-              </p>
               {qrPhone && <p style={{ fontSize: '14px', color: '#aaa', marginTop: '10px' }}>
                 Puoi recuperare il QR code inserendo il numero <strong>{qrPhone}</strong> nella pagina Recupera QR.
               </p>}
