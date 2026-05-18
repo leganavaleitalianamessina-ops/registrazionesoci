@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
 
 interface SaveQRCardProps {
@@ -9,10 +9,20 @@ interface SaveQRCardProps {
   firstName?: string;
   lastName?: string;
   token?: string;
+  autoSave?: boolean;
 }
 
-export default function SaveQRCard({ children, fileName = 'LNI_Messina_QR', firstName, lastName, token }: SaveQRCardProps) {
+export default function SaveQRCard({ children, fileName = 'LNI_Messina_QR', firstName, lastName, token, autoSave }: SaveQRCardProps) {
   const [saving, setSaving] = useState(false);
+  const [autoSaved, setAutoSaved] = useState(false);
+
+  useEffect(() => {
+    if (autoSave && !autoSaved && token) {
+      setAutoSaved(true);
+      const timer = setTimeout(() => handleSaveImage(), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [autoSave, autoSaved, token]);
 
   const handleSaveImage = async () => {
     if (!token) return;

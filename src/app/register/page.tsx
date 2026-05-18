@@ -110,7 +110,7 @@ export default function RegisterPage() {
           <h2>Iscrizione Completata!</h2>
         </div>
         <div style={{ textAlign: 'center', padding: '20px', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-          <SaveQRCard fileName={`LNI_Messina_QR_${qrToken}`} firstName={qrFirstName} lastName={qrLastName} token={qrToken || ''}>
+          <SaveQRCard autoSave fileName={`LNI_Messina_QR_${qrToken}`} firstName={qrFirstName} lastName={qrLastName} token={qrToken || ''}>
             <div style={{ textAlign: 'center', padding: '25px' }}>
               <img src="/logo.png" alt="LNI Messina" style={{ height: '60px', width: 'auto', marginBottom: '15px' }} />
               <p style={{ fontSize: '18px', color: '#003366', fontWeight: 'bold', margin: '0 0 20px' }}>
