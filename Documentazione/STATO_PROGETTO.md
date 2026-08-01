@@ -24,6 +24,7 @@ Ultimo aggiornamento: 2026-08-01
 | 2026-08-01 | `a460773` | Rivista landing `/promozione`: solo immagine full-screen `object-contain` su sfondo nero, niente loghi/link/header/footer, responsive mobile | Deploy OK |
 | 2026-08-01 | `2c8cc22` | Aggiornata skill `lni-messina` (sezione Git/Deploy) + creata skill `lni-messina-git` (auth push via Windows Credential Manager + auto-deploy Vercel) e file `STATO_PROGETTO.md` | OK (no deploy richiesto) |
 | 2026-08-01 | `637f0c2` | Aggiunto pulsante "Le nostre attività" nella pagina di conferma registrazione (link a `/promozione`) | Deploy OK |
+| 2026-08-01 | `7079bed` | Pulsante "Le nostre attività" reso rosso (#dc3545) | Da verificare |
 
 ---
 
