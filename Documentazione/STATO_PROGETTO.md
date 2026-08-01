@@ -8,7 +8,7 @@ Ultimo aggiornamento: 2026-08-01
 
 ## Riepilogo stato attuale
 
-- **Landing page `/promozione`**: attiva in produzione, visualizza solo il poster promozionale (immagine full-screen `object-contain`, altezza viewport dinamica `100dvh`), responsive mobile, senza loghi/link.
+- **Landing page `/promozione`**: attiva in produzione, visualizza solo il poster promozionale a larghezza piena (`w-full h-auto`), pagina scrollabile in altezza, senza loghi/link.
 - **Tailwind CSS ora funzionante**: mancava `postcss.config.js` e la cache di build di Next non rigenera al solo cambio di config; risolto con `postcss.config.js` + cambio a `globals.css`. Da ora tutte le classi utility Tailwind del sito sono attive (prima non venivano generate).
 - **Skill opencode**: `lni-messina` (contesto progetto), `lni-messina-git` (procedure commit/push/deploy).
 - **Repository**: `github.com/leganavaleitalianamessina-ops/registrazionesoci`, branch `main`.
@@ -29,6 +29,7 @@ Ultimo aggiornamento: 2026-08-01
 | 2026-08-01 | `d71245d` | Fix `/promozione`: altezza viewport dinamico `100dvh` (fallback `100vh`) | Deploy OK (fix inefficace senza compilazione Tailwind) |
 | 2026-08-01 | `b7b498b` | **Fix root cause**: creato `postcss.config.js` (plugin tailwindcss) — mancava del tutto, le utility Tailwind (h-screen, max-h-full, object-contain, 100dvh, ecc.) non venivano generate in nessuna pagina | Deploy non efficace: la cache di build di Next non si invalida al solo cambio di postcss.config.js |
 | 2026-08-01 | `6070b43` | **Fix cache PostCSS**: aggiunta regola `html, body { height: 100% }` a `globals.css` per forzare il re-process di Tailwind (la cache di build di Next ignora i cambi di postcss.config.js). CSS rigenerato con tutte le utility | Deploy OK — `/promozione` si adatta correttamente allo schermo |
+| 2026-08-01 | `7d96328` | `/promozione` rivista: poster a larghezza piena (`w-full h-auto`) su sfondo bianco, pagina scrollabile in altezza (rimossi viewport fisso `100vh`/`100dvh` e sfondo nero) | Da verificare |
 
 ---
 
