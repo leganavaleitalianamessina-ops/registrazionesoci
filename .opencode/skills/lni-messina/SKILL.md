@@ -104,6 +104,11 @@ Punti chiave schema:
 - `Documentazione/WebAppSociLNIMessina.md` — specifica tecnica v3.2 (requisiti, GDPR, flussi).
 - `Documentazione/GUIDA_UTENTE.md` — guida per pubblico/operatore/admin.
 - `Documentazione/MANUALE_OPERATORE.md` — manuale operatore.
+- `Documentazione/STATO_PROGETTO.md` — registro attività eseguite sul progetto (aggiornare a ogni intervento).
+
+## Operazioni Git e Deploy
+
+Per commit, push e deploy su Vercel carica la skill dedicata **`lni-messina-git`**: contiene le procedure dettagliate per l'autenticazione (credenziali salvate in Windows Credential Manager), i comandi di push e la verifica del deploy automatico Vercel.
 
 ## Note operative
 
