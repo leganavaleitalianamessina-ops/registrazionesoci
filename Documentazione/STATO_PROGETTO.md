@@ -22,8 +22,8 @@ Ultimo aggiornamento: 2026-08-01
 | 2026-08-01 | `d4b90c4` | Creata skill di contesto `.opencode/skills/lni-messina/SKILL.md` | OK |
 | 2026-08-01 | `d4b90c4` | Creata landing page `/promozione` (poster 1080×3200 ottimizzato a 720px JPEG 376KB in `public/promozione/poster.jpg`, header LNI + poster scrollabile + CTA) | Deploy OK |
 | 2026-08-01 | `a460773` | Rivista landing `/promozione`: solo immagine full-screen `object-contain` su sfondo nero, niente loghi/link/header/footer, responsive mobile | Deploy OK |
-| 2026-08-01 | (prossimo commit) | Creata skill `.opencode/skills/lni-messina-git/SKILL.md` (auth push via Windows Credential Manager + auto-deploy Vercel) e questo file | Da verificare |
-| 2026-08-01 | `637f0c2` | Aggiunto pulsante "Le nostre attività" nella pagina di conferma registrazione (link a `/promozione`) | Da verificare |
+| 2026-08-01 | `2c8cc22` | Aggiornata skill `lni-messina` (sezione Git/Deploy) + creata skill `lni-messina-git` (auth push via Windows Credential Manager + auto-deploy Vercel) e file `STATO_PROGETTO.md` | OK (no deploy richiesto) |
+| 2026-08-01 | `637f0c2` | Aggiunto pulsante "Le nostre attività" nella pagina di conferma registrazione (link a `/promozione`) | Deploy OK |
 
 ---
 
