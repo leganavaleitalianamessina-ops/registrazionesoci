@@ -130,7 +130,7 @@ export default function RegisterPage() {
             <button onClick={() => window.open(`/validate/${qrToken}`, '_blank')} className="button-legacy">
               Visualizza QR Code
             </button>
-            <button onClick={() => window.open('/promozione', '_blank')} className="button-legacy" style={{ backgroundColor: '#28a745' }}>
+            <button onClick={() => window.open('/promozione', '_blank')} className="button-legacy" style={{ backgroundColor: '#dc3545' }}>
               Le nostre attività
             </button>
             <button onClick={() => window.location.href = '/'} className="button-legacy" style={{ backgroundColor: '#666' }}>
