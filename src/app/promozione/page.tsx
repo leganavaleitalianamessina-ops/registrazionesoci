@@ -6,11 +6,11 @@ export const metadata: Metadata = {
 
 export default function PromozionePage() {
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-black supports-[height:100dvh]:h-[100dvh]">
+    <div className="w-full bg-white">
       <img
         src="/promozione/poster.jpg"
         alt="Poster promozionale LNI Messina"
-        className="block max-h-full max-w-full object-contain"
+        className="block h-auto w-full"
       />
     </div>
   );
