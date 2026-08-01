@@ -29,7 +29,7 @@ Ultimo aggiornamento: 2026-08-01
 | 2026-08-01 | `d71245d` | Fix `/promozione`: altezza viewport dinamico `100dvh` (fallback `100vh`) | Deploy OK (fix inefficace senza compilazione Tailwind) |
 | 2026-08-01 | `b7b498b` | **Fix root cause**: creato `postcss.config.js` (plugin tailwindcss) — mancava del tutto, le utility Tailwind (h-screen, max-h-full, object-contain, 100dvh, ecc.) non venivano generate in nessuna pagina | Deploy non efficace: la cache di build di Next non si invalida al solo cambio di postcss.config.js |
 | 2026-08-01 | `6070b43` | **Fix cache PostCSS**: aggiunta regola `html, body { height: 100% }` a `globals.css` per forzare il re-process di Tailwind (la cache di build di Next ignora i cambi di postcss.config.js). CSS rigenerato con tutte le utility | Deploy OK — `/promozione` si adatta correttamente allo schermo |
-| 2026-08-01 | `7d96328` | `/promozione` rivista: poster a larghezza piena (`w-full h-auto`) su sfondo bianco, pagina scrollabile in altezza (rimossi viewport fisso `100vh`/`100dvh` e sfondo nero) | Da verificare |
+| 2026-08-01 | `7d96328` | `/promozione` rivista: poster a larghezza piena (`w-full h-auto`) su sfondo bianco, pagina scrollabile in altezza (rimossi viewport fisso `100vh`/`100dvh` e sfondo nero) | Deploy OK |
 
 ---
 
