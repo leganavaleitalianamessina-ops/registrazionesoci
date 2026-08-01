@@ -25,7 +25,8 @@ Ultimo aggiornamento: 2026-08-01
 | 2026-08-01 | `2c8cc22` | Aggiornata skill `lni-messina` (sezione Git/Deploy) + creata skill `lni-messina-git` (auth push via Windows Credential Manager + auto-deploy Vercel) e file `STATO_PROGETTO.md` | OK (no deploy richiesto) |
 | 2026-08-01 | `637f0c2` | Aggiunto pulsante "Le nostre attività" nella pagina di conferma registrazione (link a `/promozione`) | Deploy OK |
 | 2026-08-01 | `7079bed` | Pulsante "Le nostre attività" reso rosso (#dc3545) | Deploy OK |
-| 2026-08-01 | `d71245d` | Fix `/promozione`: altezza viewport dinamico `100dvh` (fallback `100vh`) per adattamento immediato su smartphone | Da verificare |
+| 2026-08-01 | `d71245d` | Fix `/promozione`: altezza viewport dinamico `100dvh` (fallback `100vh`) | Deploy OK (fix inefficace senza compilazione Tailwind) |
+| 2026-08-01 | (prossimo commit) | **Fix root cause**: creato `postcss.config.js` (plugin tailwindcss) — mancava del tutto, le utility Tailwind (h-screen, max-h-full, object-contain, 100dvh, ecc.) non venivano generate in nessuna pagina. Da qui in poi le classi Tailwind funzionano in tutto il sito | Da verificare |
 
 ---
 
