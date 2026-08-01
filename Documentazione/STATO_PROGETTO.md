@@ -26,7 +26,8 @@ Ultimo aggiornamento: 2026-08-01
 | 2026-08-01 | `637f0c2` | Aggiunto pulsante "Le nostre attività" nella pagina di conferma registrazione (link a `/promozione`) | Deploy OK |
 | 2026-08-01 | `7079bed` | Pulsante "Le nostre attività" reso rosso (#dc3545) | Deploy OK |
 | 2026-08-01 | `d71245d` | Fix `/promozione`: altezza viewport dinamico `100dvh` (fallback `100vh`) | Deploy OK (fix inefficace senza compilazione Tailwind) |
-| 2026-08-01 | (prossimo commit) | **Fix root cause**: creato `postcss.config.js` (plugin tailwindcss) — mancava del tutto, le utility Tailwind (h-screen, max-h-full, object-contain, 100dvh, ecc.) non venivano generate in nessuna pagina. Da qui in poi le classi Tailwind funzionano in tutto il sito | Da verificare |
+| 2026-08-01 | `b7b498b` | **Fix root cause**: creato `postcss.config.js` (plugin tailwindcss) — mancava del tutto, le utility Tailwind (h-screen, max-h-full, object-contain, 100dvh, ecc.) non venivano generate in nessuna pagina | Deploy non efficace: la cache di build di Next non si invalida al solo cambio di postcss.config.js |
+| 2026-08-01 | (prossimo commit) | **Fix cache PostCSS**: aggiunta regola `html, body { height: 100% }` a `globals.css` per forzare il re-process di Tailwind (la cache di build di Next ignora i cambi di postcss.config.js). CSS rigenerato con tutte le utility | Da verificare |
 
 ---
 
